@@ -1,0 +1,9 @@
+<div class="vw-100 vh-100 position-relative">
+  <div id="map" class="w-100 h-100 position-absolute"></div>
+
+  <app-map-menu></app-map-menu>
+  
+  <app-map-sidebar>
+    <ng-content select="[location=sidebar]"></ng-content>
+  </app-map-sidebar>
+</div>

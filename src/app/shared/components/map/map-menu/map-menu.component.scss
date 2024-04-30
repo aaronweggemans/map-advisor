@@ -1,0 +1,12 @@
+.map-overlay {
+  z-index: 500;
+}
+
+.menu-position {
+  left: 0;
+  margin: 10px;
+  height: calc(100% - 20px); /* Hoogte van de viewport minus dubbele marge */
+  display: flex;
+  justify-content: center; /*centers items on the line (the x-axis by default)*/
+  align-items: center
+}
