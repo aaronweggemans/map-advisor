@@ -9,7 +9,7 @@ export interface FuelStation {
   postal_code: string;
   city: string;
   coordinate: Coordinate;
-  prices: Prices;
+  prices: Prices[];
 }
 
 export interface Coordinate {

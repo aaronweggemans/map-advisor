@@ -11,18 +11,20 @@ export class CheapFuelStationsService {
 
   constructor(private httpClient: HttpClient) {}
 
-  getCheapFuelStations(): Observable<FuelStation> {
+  getCheapFuelStations(): Observable<FuelStation[]> {
     return this.httpClient
-      .get<FuelStationDTO>(`${this._url}api/v1/fuel-stations`)
+      .get<FuelStationDTO[]>(`${this._url}api/v1/fuel-stations`)
       .pipe(map(this._toFuelStation));
   }
 
-  private _toFuelStation = (fuelStation: FuelStationDTO) => ({
-    ...fuelStation,
-    lat: fuelStation.location_lat,
-    lon: fuelStation.location_lon,
-    coordinate: this._toCoordinate(fuelStation.coordinate),
-  });
+  private _toFuelStation = (fuelStation: FuelStationDTO[]) =>
+    fuelStation.map((fuelStation) => ({
+      ...fuelStation,
+      lat: fuelStation.location_lat,
+      lon: fuelStation.location_lon,
+      coordinate: this._toCoordinate(fuelStation.coordinate),
+      prices: this._toPrices(fuelStation.prices),
+    }));
 
   private _toCoordinate = (coordinate: CoordinateDTO | undefined) => ({
     id: coordinate?.id ? coordinate?.id : null,
@@ -31,6 +33,8 @@ export class CheapFuelStationsService {
     north_east_lat: coordinate?.northeast_lat ? coordinate?.northeast_lat : 0,
     north_east_lon: coordinate?.northeast_lon ? coordinate?.northeast_lon : 0,
   });
+
+  private _toPrices = (prices: PricesDTO[]) => prices.map((prices) => prices);
 }
 
 interface FuelStationDTO {
@@ -44,7 +48,7 @@ interface FuelStationDTO {
   postal_code: string;
   city: string;
   coordinate?: CoordinateDTO;
-  prices: PricesDTO;
+  prices: PricesDTO[];
 }
 
 interface CoordinateDTO {
