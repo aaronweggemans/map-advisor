@@ -1,18 +1,46 @@
-<p class="mt-2 fw-bold text-center">CHEAPEST FUEL STATIONS</p>
-<p class="text-center">Below you can see the cheapest fuel prices <i class="font-italic">(Supported)</i></p>
-
-<ng-container *ngIf="foundFuelStation$ | async as fuelstation">
-  <div class="card bg-transparent">
-    <img class="card-img-top" [src]="findGoogleImage(fuelstation.lat, fuelstation.lon)" alt="Card image cap">
-    <div class="card-body">
-      <h5 class="card-title">{{ fuelstation.brand_name }} <i *ngIf="fuelstation.name" class="font-italic">({{ fuelstation.name }})</i></h5>
-    </div>
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item bg-transparent">Streetname: {{ fuelstation.street }}</li>
-      <li class="list-group-item bg-transparent">Postalcode: {{ fuelstation.postal_code }}</li>
-      <li class="list-group-item bg-transparent">City: {{ fuelstation.city }}</li>
-    </ul>
-  </div>
-
-  {{ convertFuelStationPrices(fuelstation.prices )}}
+<ng-container *ngIf="loading; else content">
+  <ngx-loading
+    [show]="true"
+    [config]="{ 
+      backdropBorderRadius: '3px', 
+      backdropBackgroundColour: 'rgba(0,0,0,0)',
+      primaryColour: 'rgb(255, 99, 132)',
+      secondaryColour: 'rgb(255, 159, 64)',
+      tertiaryColour: 'rgb(255, 205, 86)',
+    }"
+    [template]="loadingContent"
+  ></ngx-loading>
 </ng-container>
+
+<ng-template #content>
+  <p class="mt-2 fw-bold text-center">CHEAPEST FUEL STATIONS</p>
+  <p class="text-center">Below you can see the cheapest fuel prices <i class="font-italic">(Supported)</i></p>
+  <p class="text-center">Please select a fuelstation on the map to get information.</p>
+  
+  <ng-container *ngIf="foundFuelStation$ | async as fuelstation">
+    <div class="card bg-transparent">
+      <img class="card-img-top" [src]="findGoogleImage(fuelstation.lat, fuelstation.lon)" alt="Card image cap">
+      <div class="card-body">
+        <h5 class="card-title">{{ fuelstation.brand_name }} <i *ngIf="fuelstation.name" class="font-italic">({{ fuelstation.name }})</i></h5>
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item bg-transparent">Streetname: {{ fuelstation.street }}</li>
+        <li class="list-group-item bg-transparent">Postalcode: {{ fuelstation.postal_code }}</li>
+        <li class="list-group-item bg-transparent">City: {{ fuelstation.city }}</li>
+      </ul>
+      <div class="card-body">
+        <h5 class="card-title">Actual fuelprices:</h5>
+        <small>Last updated: {{ fuelstation.prices[0].record }}</small>
+        <app-bar-chart [barChartData]="fuelstation.barChartData"></app-bar-chart>
+      </div>
+    </div>
+  </ng-container>
+</ng-template>
+
+<ng-template #loadingContent>
+  <div class="text-center">
+    <h6 class="mt-2 fw-bold text-center">PLEASE WAIT ONE MOMENT...</h6>
+    <p>We are trying to fetch the information from the database</p>
+    <p>This should take about a few seconds...</p>
+  </div>
+</ng-template>

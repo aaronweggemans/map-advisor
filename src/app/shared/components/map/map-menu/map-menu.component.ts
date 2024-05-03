@@ -9,4 +9,12 @@ import { RouterModule } from '@angular/router';
   templateUrl: './map-menu.component.html',
   styleUrl: './map-menu.component.scss',
 })
-export class MapMenuComponent {}
+export class MapMenuComponent {
+  mouseEnter() {
+    console.log('mouse enter');
+  }
+
+  mouseLeave() {
+    console.log('Mouse leave');
+  }
+}
