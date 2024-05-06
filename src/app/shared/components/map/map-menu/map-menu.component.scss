@@ -10,3 +10,12 @@
   justify-content: center; /*centers items on the line (the x-axis by default)*/
   align-items: center
 }
+
+.sidebar-position {
+  left: 0;
+  margin: 75px;
+  height: calc(100% - 150px);
+  display: flex;
+  justify-content: center;
+  align-items: center
+}

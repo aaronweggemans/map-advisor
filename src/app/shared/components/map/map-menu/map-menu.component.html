@@ -3,11 +3,15 @@
     <a class="btn btn-primary" routerLink="/dashboard" routerLinkActive="active">
       <i class="fa fa-home fa-sm m-2" aria-hidden="true"></i>
     </a>
-    <a class="btn btn-primary" routerLink="/cheap-fuel-stations" routerLinkActive="active">
+    <a class="btn btn-primary" (click)="openOrCloseSidebar()">
       <i class="fa fa-car fa-sm m-2" aria-hidden="true"></i>
     </a>
     <a class="btn btn-primary" routerLink="/cheap-beer" routerLinkActive="active">
       <i class="fa fa fa-beer fa-sm m-2" aria-hidden="true"></i>
     </a>
   </form>
+</div>
+
+<div class="position-absolute map-overlay sidebar-position align-middle" *ngIf="openendSidebar.fuelPrices">
+  <app-sidebar-detail-fuel-prices (closeSidebar)="openOrCloseSidebar()"></app-sidebar-detail-fuel-prices>
 </div>

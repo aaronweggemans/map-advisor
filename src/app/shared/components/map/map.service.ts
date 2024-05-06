@@ -33,7 +33,10 @@ export class MapService {
       lng: fuelStation.lon,
     };
 
-    const circleLocation = circle(coordinates, { radius: 10 });
+    const circleLocation = circle(coordinates, {
+      radius: 10,
+      color: this.setFadeColorOnNumber(fuelStation.price_indication!),
+    });
     this._allMapLayers.addLayer(circleLocation);
     circleLocation.on('click', () => {
       this._map.flyTo(coordinates, 14);
@@ -45,5 +48,11 @@ export class MapService {
 
   clearMapLayers() {
     this._allMapLayers.clearLayers();
+  }
+
+  private setFadeColorOnNumber(percentage: number) {
+    const value = percentage / 100;
+    const hue = ((1 - value) * 120).toString(10);
+    return ['hsl(', hue, ',100%,50%)'].join('');
   }
 }

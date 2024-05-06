@@ -8,6 +8,5 @@ import { CheapFuelStationsComponent } from './cheap-fuel-stations/cheap-fuel-sta
   standalone: true,
   imports: [MapComponent, RouterOutlet, CheapFuelStationsComponent],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent {}

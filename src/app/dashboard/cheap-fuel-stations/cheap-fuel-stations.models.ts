@@ -9,6 +9,7 @@ export interface FuelStation {
   postal_code: string;
   city: string;
   coordinate: Coordinate;
+  price_indication?: number;
   prices: Prices[];
 }
 
@@ -29,3 +30,11 @@ export interface Prices {
   record: string;
   source: string;
 }
+
+export type SoortFuelType =
+  | 'autogas'
+  | 'cng'
+  | 'diesel'
+  | 'diesel_special'
+  | 'euro98'
+  | 'euro95';

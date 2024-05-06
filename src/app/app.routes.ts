@@ -8,7 +8,7 @@ export const routes: Routes = [
     component: DashboardStatisticsComponent,
   },
   {
-    path: 'cheap-fuel-stations',
+    path: 'cheap-fuel-stations/:fueltype',
     component: CheapFuelStationsComponent,
   },
   {
