@@ -1,3 +1,11 @@
+export interface FuelStationSummary {
+  id: number;
+  lat: number;
+  lon: number;
+  price: number;
+  price_indication?: number;
+}
+
 export interface FuelStation {
   id: number;
   name: string;
@@ -30,7 +38,6 @@ export interface Prices {
   record: string;
   source: string;
 }
-
 export type SoortFuelType =
   | 'autogas'
   | 'cng'

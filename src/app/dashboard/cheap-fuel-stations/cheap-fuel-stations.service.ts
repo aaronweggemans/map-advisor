@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { FuelStation } from './cheap-fuel-stations.models';
+import {
+  FuelStation,
+  FuelStationSummary,
+  SoortFuelType,
+} from './cheap-fuel-stations.models';
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({
@@ -11,20 +15,37 @@ export class CheapFuelStationsService {
 
   constructor(private httpClient: HttpClient) {}
 
-  getCheapFuelStations(): Observable<FuelStation[]> {
+  getFuelStations(fueltype: SoortFuelType): Observable<FuelStationSummary[]> {
     return this.httpClient
-      .get<FuelStationDTO[]>(`${this._url}api/v1/fuel-stations`)
+      .get<FuelStationSummaryDTO[]>(
+        `${this._url}api/v1/fuel-stations/${fueltype}`
+      )
+      .pipe(map(this._toFuelStationSummary));
+  }
+
+  findFuelStationById(id: number): Observable<FuelStation> {
+    return this.httpClient
+      .get<FuelStationDTO>(`${this._url}api/v1/fuel-stations/find/${id}`)
       .pipe(map(this._toFuelStation));
   }
 
-  private _toFuelStation = (fuelStation: FuelStationDTO[]) =>
+  private _toFuelStationSummary = (
+    fuelStation: FuelStationSummaryDTO[]
+  ): FuelStationSummary[] =>
     fuelStation.map((fuelStation) => ({
       ...fuelStation,
       lat: fuelStation.location_lat,
       lon: fuelStation.location_lon,
-      coordinate: this._toCoordinate(fuelStation.coordinate),
-      prices: this._toPrices(fuelStation.prices),
+      price: fuelStation.price,
     }));
+
+  private _toFuelStation = (fuelStation: FuelStationDTO): FuelStation => ({
+    ...fuelStation,
+    lat: fuelStation.location_lat,
+    lon: fuelStation.location_lon,
+    coordinate: this._toCoordinate(fuelStation.coordinate),
+    prices: this._toPrices(fuelStation.prices),
+  });
 
   private _toCoordinate = (coordinate: CoordinateDTO | undefined) => ({
     id: coordinate?.id ? coordinate?.id : null,
@@ -37,6 +58,13 @@ export class CheapFuelStationsService {
   private _toPrices = (prices: PricesDTO[]) => prices.map((prices) => prices);
 }
 
+interface FuelStationSummaryDTO {
+  id: number;
+  location_lat: number;
+  location_lon: number;
+  price: number;
+}
+
 interface FuelStationDTO {
   id: number;
   name: string;
@@ -47,7 +75,7 @@ interface FuelStationDTO {
   street: string;
   postal_code: string;
   city: string;
-  coordinate?: CoordinateDTO;
+  coordinate: CoordinateDTO;
   prices: PricesDTO[];
 }
 
@@ -58,7 +86,6 @@ interface CoordinateDTO {
   northeast_lat: number;
   northeast_lon: number;
 }
-
 interface PricesDTO {
   id: number;
   fueltype: string;
