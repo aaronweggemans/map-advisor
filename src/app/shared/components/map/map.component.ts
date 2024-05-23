@@ -18,7 +18,6 @@ export class MapComponent implements OnInit {
       attributionControl: false,
       zoomControl: false,
     }).setView([52.136375, 6.594918], 7);
-
     tileLayer(
       'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       {
@@ -28,7 +27,6 @@ export class MapComponent implements OnInit {
         subdomains: 'abcd',
       }
     ).addTo(leafletMap);
-
     this._mapService.setMap(leafletMap);
   }
 }

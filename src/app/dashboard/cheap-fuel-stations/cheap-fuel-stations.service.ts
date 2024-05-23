@@ -6,12 +6,13 @@ import {
   SoortFuelType,
 } from './cheap-fuel-stations.models';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CheapFuelStationsService {
-  private readonly _url = 'http://localhost:8080/';
+  private readonly _url = environment.url;
 
   constructor(private httpClient: HttpClient) {}
 
