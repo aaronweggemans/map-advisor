@@ -3,19 +3,11 @@
 }
 
 .menu-position {
-  left: 0;
-  margin: 10px;
-  height: calc(100% - 20px); /* Hoogte van de viewport minus dubbele marge */
-  display: flex;
-  justify-content: center; /*centers items on the line (the x-axis by default)*/
-  align-items: center
+  top: 50%;
+  transform: translate(15%, -50%);
 }
 
 .sidebar-position {
-  left: 0;
-  margin: 75px;
-  height: calc(100% - 150px);
-  display: flex;
-  justify-content: center;
-  align-items: center
+  top: 50%;
+  transform: translate(15%, -50%);
 }

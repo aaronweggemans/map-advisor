@@ -1,10 +1,10 @@
-import { MapSidebarComponent } from './map-sidebar.component';
 import { Spectator, createComponentFactory } from '@ngneat/spectator';
+import { DetailsComponent } from './details.component';
 
-describe('MapSidebarComponent', () => {
-  let spectator: Spectator<MapSidebarComponent>;
+describe('DetailsComponent', () => {
+  let spectator: Spectator<DetailsComponent>;
   const createComponent = createComponentFactory({
-    component: MapSidebarComponent,
+    component: DetailsComponent,
   });
 
   beforeEach(() => {

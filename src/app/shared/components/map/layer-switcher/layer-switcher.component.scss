@@ -1,0 +1,23 @@
+.map-overlay {
+  z-index: 500;
+}
+
+.left-bottom {
+  left: 0;
+  margin: 10px;
+  bottom: 0;
+}
+
+.w-15 {
+  width: 15% !important;
+}
+
+.clickable-img {
+  cursor: pointer;
+}
+
+.clickable-img:hover {
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+}

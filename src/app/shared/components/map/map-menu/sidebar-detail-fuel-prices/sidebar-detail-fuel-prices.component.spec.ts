@@ -1,22 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SidebarDetailFuelPricesComponent } from './sidebar-detail-fuel-prices.component';
+import {
+  Spectator,
+  createComponentFactory,
+  mockProvider,
+} from '@ngneat/spectator';
 
 describe('SidebarDetailFuelPricesComponent', () => {
-  let component: SidebarDetailFuelPricesComponent;
-  let fixture: ComponentFixture<SidebarDetailFuelPricesComponent>;
+  let spectator: Spectator<SidebarDetailFuelPricesComponent>;
+  const createComponent = createComponentFactory({
+    component: SidebarDetailFuelPricesComponent,
+    providers: [mockProvider(RouterModule), mockProvider(ActivatedRoute)],
+  });
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [SidebarDetailFuelPricesComponent],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(SidebarDetailFuelPricesComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  beforeEach(() => {
+    spectator = createComponent();
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(spectator.component).toBeTruthy();
   });
 });

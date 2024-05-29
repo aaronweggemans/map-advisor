@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { SidebarDetailFuelPricesComponent } from './sidebar-detail-fuel-prices/sidebar-detail-fuel-prices.component';
+import { TileTheme } from '../map.component.models';
 
 @Component({
   selector: 'app-map-menu',
@@ -11,6 +12,8 @@ import { SidebarDetailFuelPricesComponent } from './sidebar-detail-fuel-prices/s
   styleUrl: './map-menu.component.scss',
 })
 export class MapMenuComponent {
+  @Input() theme: TileTheme = 'LIGHT';
+
   openendSidebar: SidebarDetails = {
     fuelPrices: false,
   };

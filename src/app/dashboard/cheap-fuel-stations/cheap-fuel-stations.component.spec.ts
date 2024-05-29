@@ -1,23 +1,29 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ActivatedRoute } from '@angular/router';
+import { MapService } from '../../shared/components/map/map.service';
 import { CheapFuelStationsComponent } from './cheap-fuel-stations.component';
+import {
+  Spectator,
+  createComponentFactory,
+  mockProvider,
+} from '@ngneat/spectator';
+import { CheapFuelStationsService } from './cheap-fuel-stations.service';
 
 describe('CheapFuelStationsComponent', () => {
-  let component: CheapFuelStationsComponent;
-  let fixture: ComponentFixture<CheapFuelStationsComponent>;
+  let spectator: Spectator<CheapFuelStationsComponent>;
+  const createComponent = createComponentFactory({
+    component: CheapFuelStationsComponent,
+    providers: [
+      mockProvider(CheapFuelStationsService),
+      mockProvider(MapService),
+      mockProvider(ActivatedRoute),
+    ],
+  });
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [CheapFuelStationsComponent]
-    })
-    .compileComponents();
-    
-    fixture = TestBed.createComponent(CheapFuelStationsComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  beforeEach(() => {
+    spectator = createComponent();
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(spectator.component).toBeTruthy();
   });
 });

@@ -1,16 +1,17 @@
-import { TestBed } from '@angular/core/testing';
-
+import { createHttpFactory, SpectatorHttp } from '@ngneat/spectator';
 import { CheapFuelStationsService } from './cheap-fuel-stations.service';
 
 describe('CheapFuelStationsService', () => {
-  let service: CheapFuelStationsService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(CheapFuelStationsService);
+  let spectator: SpectatorHttp<CheapFuelStationsService>;
+  const createHttp = createHttpFactory({
+    service: CheapFuelStationsService,
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  beforeEach(() => {
+    spectator = createHttp();
+  });
+
+  it('should create', () => {
+    expect(spectator.service).toBeTruthy();
   });
 });

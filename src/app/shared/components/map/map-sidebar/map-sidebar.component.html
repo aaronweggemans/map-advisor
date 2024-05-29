@@ -1,4 +1,7 @@
-<div class="position-absolute border-0 card w-25 sidebar blur-effect overflow-scroll">
+<div 
+  class="position-absolute border-0 card w-25 sidebar blur-effect overflow-scroll"
+  [class]="theme === 'LIGHT' ? 'white-layout' : 'black-layout'"
+>
   <div class="card-body">
     <ng-content></ng-content>
   </div>

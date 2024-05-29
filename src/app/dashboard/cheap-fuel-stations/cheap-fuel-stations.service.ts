@@ -16,7 +16,9 @@ export class CheapFuelStationsService {
 
   constructor(private httpClient: HttpClient) {}
 
-  getFuelStations(fueltype: SoortFuelType): Observable<FuelStationSummary[]> {
+  public getFuelStations(
+    fueltype: SoortFuelType
+  ): Observable<FuelStationSummary[]> {
     return this.httpClient
       .get<FuelStationSummaryDTO[]>(
         `${this._url}api/v1/fuel-stations/${fueltype}`
@@ -24,7 +26,7 @@ export class CheapFuelStationsService {
       .pipe(map(this._toFuelStationSummary));
   }
 
-  findFuelStationById(id: number): Observable<FuelStation> {
+  public findFuelStationById(id: number): Observable<FuelStation> {
     return this.httpClient
       .get<FuelStationDTO>(`${this._url}api/v1/fuel-stations/find/${id}`)
       .pipe(map(this._toFuelStation));

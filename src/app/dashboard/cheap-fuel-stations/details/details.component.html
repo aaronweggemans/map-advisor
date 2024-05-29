@@ -1,0 +1,16 @@
+<div class="card bg-transparent" *ngIf="foundFuelStation$ | async as fuelstation">
+  <img class="card-img-top" [src]="findGoogleImage(fuelstation.lat, fuelstation.lon)" alt="Card image cap">
+  <div class="card-body">
+    <h5 class="card-title">{{ fuelstation.brand_name }} <i *ngIf="fuelstation.name" class="font-italic">({{ fuelstation.name }})</i></h5>
+  </div>
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item bg-transparent">Streetname: {{ fuelstation.street }}</li>
+    <li class="list-group-item bg-transparent">Postalcode: {{ fuelstation.postal_code }}</li>
+    <li class="list-group-item bg-transparent">City: {{ fuelstation.city }}</li>
+  </ul>
+  <div class="card-body">
+    <h5 class="card-title">Actual fuelprices:</h5>
+    <small>Last updated: {{ fuelstation.prices[0].record }}</small>
+    <app-bar-chart [barChartData]="fuelstation.barChartData"></app-bar-chart>
+  </div>
+</div>

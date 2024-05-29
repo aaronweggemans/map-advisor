@@ -1,9 +1,15 @@
 <div class="vw-100 vh-100 position-relative">
-  <div id="map" class="w-100 h-100 position-absolute"></div>
+  <div 
+    id="map" 
+    class="w-100 h-100 position-absolute" 
+    [style.backgroundColor]="theme === 'LIGHT' ? '#D4DADC' : '#262626'">
+  </div>
 
-  <app-map-menu></app-map-menu>
+  <app-layer-switcher (setTheme)="setTheme($event)"></app-layer-switcher>
   
-  <app-map-sidebar>
+  <app-map-menu [theme]="theme"></app-map-menu>
+  
+  <app-map-sidebar [theme]="theme">
     <ng-content select="[location=sidebar]"></ng-content>
   </app-map-sidebar>
 </div>

@@ -13,5 +13,5 @@
 </div>
 
 <div class="position-absolute map-overlay sidebar-position align-middle" *ngIf="openendSidebar.fuelPrices">
-  <app-sidebar-detail-fuel-prices (closeSidebar)="openOrCloseSidebar()"></app-sidebar-detail-fuel-prices>
+  <app-sidebar-detail-fuel-prices [theme]="theme" (closeSidebar)="openOrCloseSidebar()"></app-sidebar-detail-fuel-prices>
 </div>

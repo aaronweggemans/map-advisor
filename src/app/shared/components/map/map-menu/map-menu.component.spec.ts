@@ -1,23 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ActivatedRoute } from '@angular/router';
 import { MapMenuComponent } from './map-menu.component';
+import {
+  Spectator,
+  createComponentFactory,
+  mockProvider,
+} from '@ngneat/spectator';
 
 describe('MapMenuComponent', () => {
-  let component: MapMenuComponent;
-  let fixture: ComponentFixture<MapMenuComponent>;
+  let spectator: Spectator<MapMenuComponent>;
+  const createComponent = createComponentFactory({
+    component: MapMenuComponent,
+    providers: [mockProvider(ActivatedRoute)],
+  });
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [MapMenuComponent]
-    })
-    .compileComponents();
-    
-    fixture = TestBed.createComponent(MapMenuComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  beforeEach(() => {
+    spectator = createComponent();
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(spectator.component).toBeTruthy();
   });
 });

@@ -1,16 +1,17 @@
-import { TestBed } from '@angular/core/testing';
-
+import { createHttpFactory, SpectatorHttp } from '@ngneat/spectator';
 import { MapService } from './map.service';
 
 describe('MapService', () => {
-  let service: MapService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(MapService);
+  let spectator: SpectatorHttp<MapService>;
+  const createHttp = createHttpFactory({
+    service: MapService,
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  beforeEach(() => {
+    spectator = createHttp();
+  });
+
+  it('should create', () => {
+    expect(spectator.service).toBeTruthy();
   });
 });
