@@ -5,15 +5,6 @@
   height: calc(100% - 20px); /* Hoogte van de viewport minus dubbele marge */
 }
 
-.white-layout {
-  background-color: rgba(255, 255, 255, 0.6);
-}
-
-.black-layout {
-  background-color: rgba(38, 38, 38, 0.6);
-  color: white;
-}
-
 .blur-effect { 
   backdrop-filter: blur(6px);
 }

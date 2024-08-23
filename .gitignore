@@ -43,3 +43,5 @@ Thumbs.db
 
 # Private env variables
 /src/environments/environment.ts
+.nx/cache
+.nx/workspace-data

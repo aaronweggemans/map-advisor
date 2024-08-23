@@ -1,23 +1,17 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { LayerSwitcherComponent } from './layer-switcher.component';
+import { createComponentFactory, Spectator } from '@ngneat/spectator/jest';
 
 describe('LayerSwitcherComponent', () => {
-  let component: LayerSwitcherComponent;
-  let fixture: ComponentFixture<LayerSwitcherComponent>;
+  let spectator: Spectator<LayerSwitcherComponent>;
+  const createComponent = createComponentFactory({
+    component: LayerSwitcherComponent,
+  });
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [LayerSwitcherComponent]
-    })
-    .compileComponents();
-    
-    fixture = TestBed.createComponent(LayerSwitcherComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  beforeEach(() => {
+    spectator = createComponent();
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(spectator.component).toBeTruthy();
   });
 });

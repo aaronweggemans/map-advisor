@@ -1,10 +1,4 @@
-import {
-  Component,
-  CUSTOM_ELEMENTS_SCHEMA,
-  Input,
-  OnChanges,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, Input } from '@angular/core';
 import Chart from 'chart.js/auto';
 
 @Component({
@@ -14,10 +8,27 @@ import Chart from 'chart.js/auto';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './bar-chart.component.html',
 })
-export class BarChartComponent implements OnChanges {
-  private fuelStationsChart: Chart<any> | null = null;
+export class BarChartComponent {
+  private fuelStationsChart: Chart<'bar', string[]> | null = null;
 
-  @Input({ required: true }) barChartData!: BarChartData;
+  @Input({ required: true }) set barChartData({ labels, data }: BarChartData) {
+    this.fuelStationsChart?.destroy();
+    new Chart('fuel-stations', {
+      type: 'bar',
+      options: { scales: { y: { beginAtZero: true } } },
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Costs',
+            data,
+            backgroundColor: this.chartJsColors,
+            borderColor: this.chartJsColors,
+          },
+        ],
+      },
+    });
+  }
 
   private chartJsColors = [
     'rgb(255, 99, 132)',
@@ -28,32 +39,6 @@ export class BarChartComponent implements OnChanges {
     'rgb(153, 102, 255)',
     'rgb(201, 203, 207)',
   ];
-
-  ngOnChanges(): void {
-    this.fuelStationsChart?.destroy();
-
-    this.fuelStationsChart = new Chart('fuel-stations', {
-      type: 'bar',
-      data: {
-        labels: this.barChartData.labels,
-        datasets: [
-          {
-            label: 'Costs',
-            data: this.barChartData.data,
-            backgroundColor: this.chartJsColors,
-            borderColor: this.chartJsColors,
-          },
-        ],
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true,
-          },
-        },
-      },
-    });
-  }
 }
 
 interface BarChartData {

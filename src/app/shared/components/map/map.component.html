@@ -2,7 +2,7 @@
   <div 
     id="map" 
     class="w-100 h-100 position-absolute" 
-    [style.backgroundColor]="theme === 'LIGHT' ? '#D4DADC' : '#262626'">
+    [class]="theme === 'LIGHT' ? 'white-bg-color' : 'black-bg-color'">
   </div>
 
   <app-layer-switcher (setTheme)="setTheme($event)"></app-layer-switcher>

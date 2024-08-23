@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import {
   FuelStationSummary,
   SoortFuelType,
@@ -16,7 +16,6 @@ import {
 } from 'rxjs';
 import { MapService } from '../../shared/components/map/map.service';
 import { CommonModule } from '@angular/common';
-import { BarChartComponent } from './details/bar-chart/bar-chart.component';
 import { NgxLoadingModule } from 'ngx-loading';
 import { ActivatedRoute, Params } from '@angular/router';
 import { NotifierService } from 'angular-notifier';
@@ -28,12 +27,12 @@ import { DetailsComponent } from './details/details.component';
   templateUrl: './cheap-fuel-stations.component.html',
   imports: [CommonModule, NgxLoadingModule, DetailsComponent],
 })
-export class CheapFuelStationsComponent implements OnInit {
+export class CheapFuelStationsComponent implements OnInit, OnDestroy {
   private readonly _isLoading$ = new BehaviorSubject(true);
   public readonly isLoading$ = this._isLoading$.asObservable();
 
-  private readonly _foundGasStationId$: Subject<number> = new Subject<number>();
-  public readonly foundGasStationId$ = this._foundGasStationId$.asObservable();
+  public readonly foundGasStationId$ = this._mapService.foundGasStationId$;
+  public readonly theme$ = this._mapService.theme$;
 
   constructor(
     private _cheapFuelStationService: CheapFuelStationsService,
@@ -79,6 +78,7 @@ export class CheapFuelStationsComponent implements OnInit {
   ngOnDestroy() {
     this.cheapFuelStationsCalled.unsubscribe();
     this._mapService.clearMapLayers();
+    this._mapService.cleanupObservables();
   }
 
   private _fuelTypeToCode = new Map<string, SoortFuelType>([
@@ -91,13 +91,9 @@ export class CheapFuelStationsComponent implements OnInit {
   ]);
 
   private _appendGasStationsToMap = (fuelStations: FuelStationSummary[]) => {
-    fuelStations.forEach((fuelStation: FuelStationSummary) => {
-      const circle = this._mapService.appendFuelStationToMap(fuelStation);
-      circle.on('click', () => {
-        this._foundGasStationId$.next(fuelStation.id),
-          this._mapService.flyTo(fuelStation.lat, fuelStation.lon);
-      });
-    });
+    fuelStations.forEach((fuelStation) =>
+      this._mapService.appendFuelStationToMap(fuelStation)
+    );
   };
 
   private _calculatePriceIndication(

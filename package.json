@@ -4,10 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --output-hashing=none",
     "watch": "ng build --watch --configuration development",
     "test": "jest --coverage",
-    "clean": "rm ./dist"
+    "clean": "rm ./dist",
+    "lint": "ng lint"
   },
   "private": true,
   "dependencies": {
@@ -39,11 +40,19 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^17.3.4",
+    "@angular-eslint/builder": "17.5.2",
+    "@angular-eslint/eslint-plugin": "17.5.2",
+    "@angular-eslint/eslint-plugin-template": "17.5.2",
+    "@angular-eslint/schematics": "17.5.2",
+    "@angular-eslint/template-parser": "17.5.2",
     "@angular/cli": "^17.3.4",
     "@angular/compiler-cli": "^17.3.0",
     "@ngneat/spectator": "^18.0.2",
     "@types/jasmine": "~5.1.0",
     "@types/leaflet": "^1.9.11",
+    "@typescript-eslint/eslint-plugin": "7.11.0",
+    "@typescript-eslint/parser": "7.11.0",
+    "eslint": "^8.57.0",
     "jasmine-core": "~5.1.0",
     "jest-preset-angular": "^14.1.0",
     "typescript": "~5.4.2"

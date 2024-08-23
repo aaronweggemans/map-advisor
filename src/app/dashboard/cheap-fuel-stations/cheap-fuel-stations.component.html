@@ -13,11 +13,12 @@
 </ng-container>
 
 <ng-template #content>
-  <p class="mt-2 fw-bold text-center">CHEAPEST FUEL STATIONS</p>
-  <p class="text-center">Below you can see the cheapest fuel prices <i class="font-italic">(Supported)</i></p>
-  <p class="text-center">Please select a fuelstation on the map to get information.</p>
-
-  <app-details [gasStationId]="(foundGasStationId$ | async)!"></app-details>
+  <div *ngIf="theme$ | async as theme">
+    <p class="mt-2 fw-bold text-center">CHEAPEST FUEL STATIONS</p>
+    <p class="text-center">Below you can see the cheapest fuel prices <i class="font-italic">(Supported)</i></p>
+    <p class="text-center">Please select a fuelstation on the map to get information.</p>
+    <app-details [fontColor]="theme === 'LIGHT' ? 'text-dark' : 'text-white'" [gasStationId]="(foundGasStationId$ | async)!"></app-details>
+  </div>
 </ng-template>
 
 <ng-template #loadingContent>

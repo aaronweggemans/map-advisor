@@ -5,17 +5,24 @@ import {
   Spectator,
   createComponentFactory,
   mockProvider,
-} from '@ngneat/spectator';
+} from '@ngneat/spectator/jest';
 import { CheapFuelStationsService } from './cheap-fuel-stations.service';
+import { NotifierService } from 'angular-notifier';
+import { of } from 'rxjs';
 
 describe('CheapFuelStationsComponent', () => {
   let spectator: Spectator<CheapFuelStationsComponent>;
   const createComponent = createComponentFactory({
     component: CheapFuelStationsComponent,
     providers: [
-      mockProvider(CheapFuelStationsService),
+      mockProvider(CheapFuelStationsService, {
+        getFuelStations: () => of(),
+      }),
       mockProvider(MapService),
-      mockProvider(ActivatedRoute),
+      mockProvider(ActivatedRoute, {
+        params: of({ fuelType: 'lpg' }),
+      }),
+      mockProvider(NotifierService),
     ],
   });
 
