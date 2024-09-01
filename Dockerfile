@@ -8,9 +8,8 @@ COPY package-lock.json ./
 # RUN npm install
 # RUN npm install -g @angular/cli
 
-RUN NODE_ENV=development npm i
-# RUN npm ci
-# RUN npm install -g @angular/cli@17
+RUN npm ci
+RUN npm install -g @angular/cli@17
 
 COPY . .
 
