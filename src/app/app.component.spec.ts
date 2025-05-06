@@ -1,16 +1,12 @@
-import { ActivatedRoute } from '@angular/router';
 import { AppComponent } from './app.component';
-import {
-  Spectator,
-  createComponentFactory,
-  mockProvider,
-} from '@ngneat/spectator';
+import { Spectator, createComponentFactory } from '@ngneat/spectator';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 describe('AppComponent', () => {
   let spectator: Spectator<AppComponent>;
+
   const createComponent = createComponentFactory({
     component: AppComponent,
-    providers: [mockProvider(ActivatedRoute)],
   });
 
   beforeEach(() => {
@@ -19,5 +15,9 @@ describe('AppComponent', () => {
 
   it('should create', () => {
     expect(spectator.component).toBeTruthy();
+  });
+
+  it('should create the correct components', () => {
+    expect(spectator.query(DashboardComponent)).toBeTruthy();
   });
 });

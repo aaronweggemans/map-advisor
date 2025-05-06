@@ -4,7 +4,6 @@ import { TileTheme } from '../map.component.models';
 @Component({
   selector: 'app-map-sidebar',
   standalone: true,
-  imports: [],
   templateUrl: './map-sidebar.component.html',
   styleUrl: './map-sidebar.component.scss',
 })

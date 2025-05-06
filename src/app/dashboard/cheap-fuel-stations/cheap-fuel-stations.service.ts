@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {map, Observable} from 'rxjs';
 import {
   FuelStation,
   FuelStationSummary,
   SoortFuelType,
 } from './cheap-fuel-stations.models';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment.development';
+import {HttpClient} from '@angular/common/http';
+import {environment} from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
@@ -14,15 +14,12 @@ import { environment } from '../../../environments/environment.development';
 export class CheapFuelStationsService {
   private readonly _url = environment.url;
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient) {
+  }
 
-  public getFuelStations(
-    fueltype: SoortFuelType
-  ): Observable<FuelStationSummary[]> {
+  public getFuelStations(fueltype: SoortFuelType): Observable<FuelStationSummary[]> {
     return this.httpClient
-      .get<FuelStationSummaryDTO[]>(
-        `${this._url}api/v1/fuel-stations/${fueltype}`
-      )
+      .get<FuelStationSummaryDTO[]>(`${this._url}api/v1/fuel-stations/${fueltype}`)
       .pipe(map(this._toFuelStationSummary));
   }
 
@@ -61,14 +58,14 @@ export class CheapFuelStationsService {
   private _toPrices = (prices: PricesDTO[]) => prices.map((prices) => prices);
 }
 
-interface FuelStationSummaryDTO {
+type FuelStationSummaryDTO = {
   id: number;
   location_lat: number;
   location_lon: number;
   price: number;
 }
 
-interface FuelStationDTO {
+type FuelStationDTO = {
   id: number;
   name: string;
   brand_name: string;
@@ -82,14 +79,15 @@ interface FuelStationDTO {
   prices: PricesDTO[];
 }
 
-interface CoordinateDTO {
+type CoordinateDTO = {
   id: number;
   southwest_lat: number;
   southwest_lon: number;
   northeast_lat: number;
   northeast_lon: number;
 }
-interface PricesDTO {
+
+type PricesDTO = {
   id: number;
   fueltype: string;
   station: string;

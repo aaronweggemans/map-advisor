@@ -1,0 +1,11 @@
+.map-overlay {
+  position: fixed;
+  z-index: 500;
+  bottom: 0;
+}
+
+.clickable-img:hover {
+  -webkit-box-shadow: 0 0 5px 0 rgba(0,0,0,0.75);
+  -moz-box-shadow: 0 0 5px 0 rgba(0,0,0,0.75);
+  box-shadow: 0 0 5px 0 rgba(0,0,0,0.75);
+}

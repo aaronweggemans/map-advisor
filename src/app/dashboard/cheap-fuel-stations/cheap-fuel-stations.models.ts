@@ -1,4 +1,4 @@
-export interface FuelStationSummary {
+export type FuelStationSummary = {
   id: number;
   lat: number;
   lon: number;
@@ -6,7 +6,7 @@ export interface FuelStationSummary {
   price_indication?: number;
 }
 
-export interface FuelStation {
+export type FuelStation = {
   id: number;
   name: string;
   brand_name: string;
@@ -21,7 +21,7 @@ export interface FuelStation {
   prices: Prices[];
 }
 
-export interface Coordinate {
+export type Coordinate = {
   id: number | null;
   south_west_lat: number;
   south_west_lon: number;
@@ -29,7 +29,7 @@ export interface Coordinate {
   north_east_lon: number;
 }
 
-export interface Prices {
+export type Prices = {
   id: number;
   fueltype: string;
   station: string;
@@ -38,6 +38,7 @@ export interface Prices {
   record: string;
   source: string;
 }
+
 export type SoortFuelType =
   | 'autogas'
   | 'cng'

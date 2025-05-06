@@ -1,0 +1,11 @@
+<div class="">
+  <app-layer-switcher *ngIf="isTablet$ | async" (setTheme)="setTheme($event)"></app-layer-switcher>
+
+  <div id="map" class="w-100 h-100 position-fixed" [class]="theme === 'LIGHT' ? 'white-bg-color' : 'black-bg-color'"></div>
+
+  <app-map-menu [theme]="theme"></app-map-menu>
+
+  <app-map-sidebar [theme]="theme">
+    <ng-content select="[location=sidebar]"></ng-content>
+  </app-map-sidebar>
+</div>

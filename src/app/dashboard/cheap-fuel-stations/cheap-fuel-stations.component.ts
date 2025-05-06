@@ -1,25 +1,24 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import {
   FuelStationSummary,
   SoortFuelType,
 } from './cheap-fuel-stations.models';
-import { CheapFuelStationsService } from './cheap-fuel-stations.service';
+import {CheapFuelStationsService} from './cheap-fuel-stations.service';
 import {
   BehaviorSubject,
   catchError,
   EMPTY,
   map,
-  Subject,
   Subscription,
   switchMap,
   tap,
 } from 'rxjs';
-import { MapService } from '../../shared/components/map/map.service';
-import { CommonModule } from '@angular/common';
-import { NgxLoadingModule } from 'ngx-loading';
-import { ActivatedRoute, Params } from '@angular/router';
-import { NotifierService } from 'angular-notifier';
-import { DetailsComponent } from './details/details.component';
+import {MapService} from '../../map/map.service';
+import {CommonModule} from '@angular/common';
+import {NgxLoadingModule} from 'ngx-loading';
+import {ActivatedRoute, Params} from '@angular/router';
+import {NotifierService} from 'angular-notifier';
+import {DetailsComponent} from './details/details.component';
 
 @Component({
   selector: 'app-cheap-fuel-stations',
@@ -35,11 +34,12 @@ export class CheapFuelStationsComponent implements OnInit, OnDestroy {
   public readonly theme$ = this._mapService.theme$;
 
   constructor(
-    private _cheapFuelStationService: CheapFuelStationsService,
-    private _mapService: MapService,
-    private _route: ActivatedRoute,
-    private _notifierService: NotifierService
-  ) {}
+    private readonly _cheapFuelStationService: CheapFuelStationsService,
+    private readonly _mapService: MapService,
+    private readonly _route: ActivatedRoute,
+    private readonly _notifierService: NotifierService
+  ) {
+  }
 
   cheapFuelStationsCalled!: Subscription;
 
@@ -90,29 +90,17 @@ export class CheapFuelStationsComponent implements OnInit, OnDestroy {
     ['euro95', 'euro95'],
   ]);
 
-  private _appendGasStationsToMap = (fuelStations: FuelStationSummary[]) => {
-    fuelStations.forEach((fuelStation) =>
-      this._mapService.appendFuelStationToMap(fuelStation)
-    );
+  private readonly _appendGasStationsToMap = (fuelStations: FuelStationSummary[]) => {
+    fuelStations.forEach((fuelStation) => this._mapService.appendFuelStationToMap(fuelStation));
   };
 
-  private _calculatePriceIndication(
-    fuelStations: FuelStationSummary[]
-  ): FuelStationSummary[] {
-    const highestCosts = Math.max.apply(
-      Math,
-      fuelStations.map((station) => station.price)
-    );
-    const lowestCosts = Math.min.apply(
-      Math,
-      fuelStations.map((station) => station.price)
-    );
+  private _calculatePriceIndication(fuelStations: FuelStationSummary[]): FuelStationSummary[] {
+    const highestCosts = Math.max(...fuelStations.map((station) => station.price));
+    const lowestCosts = Math.min(...fuelStations.map((station) => station.price));
 
     return fuelStations.map((station: FuelStationSummary) => ({
       ...station,
-      price_indication: Math.floor(
-        ((station.price - lowestCosts) / (highestCosts - lowestCosts)) * 100
-      ),
+      price_indication: Math.floor(((station.price - lowestCosts) / (highestCosts - lowestCosts)) * 100),
     }));
   }
 }
