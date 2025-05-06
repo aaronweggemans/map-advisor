@@ -1,0 +1,14 @@
+<div class="position-fixed map-overlay menu-position align-middle">
+  <form class="btn-group-vertical">
+    <a class="btn btn-secondary" routerLink="/dashboard" routerLinkActive="active" (click)="closeSidebar()">
+      <i class="fa fa-home fa-sm m-2" aria-hidden="true"></i>
+    </a>
+    <a href="#" class="btn btn-secondary" (click)="openOrCloseSidebar()">
+      <i class="fa fa-car fa-sm m-2" aria-hidden="true"></i>
+    </a>
+  </form>
+</div>
+
+<div class="position-fixed map-overlay sidebar-position align-middle" *ngIf="openendSidebar.fuelPrices">
+  <app-sidebar-detail-fuel-prices [theme]="theme" (closeSidebar)="openOrCloseSidebar()"></app-sidebar-detail-fuel-prices>
+</div>

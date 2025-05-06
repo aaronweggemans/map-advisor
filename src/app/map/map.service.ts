@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
-import { Circle, circle, layerGroup, Map, tileLayer } from 'leaflet';
-import { FuelStationSummary } from '../../../dashboard/cheap-fuel-stations/cheap-fuel-stations.models';
+import {Injectable} from '@angular/core';
+import {Circle, circle, layerGroup, Map, tileLayer} from 'leaflet';
+import {FuelStationSummary} from '../dashboard/cheap-fuel-stations/cheap-fuel-stations.models';
 import {
   DARK_TILE_LAYER_THEME,
   DEFAULT_LATITUDE,
   DEFAULT_LONGITUDE,
   DEFAULT_ZOOM,
   DFEAULT_TILE_LAYER_THEME,
-} from '../../../app.contants';
-import { TileTheme } from './map.component.models';
-import { BehaviorSubject, Observable, Subject, takeUntil } from 'rxjs';
+} from '../app.contants';
+import {TileTheme} from './map.component.models';
+import {BehaviorSubject, Observable, Subject, takeUntil} from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -22,21 +22,17 @@ export class MapService {
   private readonly _onDestroy$ = new Subject<void>();
 
   private readonly _foundGasStationId$: Subject<number> = new Subject<number>();
-  public readonly foundGasStationId$: Observable<number> =
-    this._foundGasStationId$.asObservable().pipe(takeUntil(this._onDestroy$));
+  public readonly foundGasStationId$: Observable<number> = this._foundGasStationId$.asObservable().pipe(takeUntil(this._onDestroy$));
 
-  private readonly _theme$: BehaviorSubject<TileTheme> =
-    new BehaviorSubject<TileTheme>('LIGHT');
+  private readonly _theme$: BehaviorSubject<TileTheme> = new BehaviorSubject<TileTheme>('LIGHT');
   public readonly theme$: Observable<TileTheme> = this._theme$.asObservable();
 
-  constructor() {}
-
-  setMap(map: Map): void {
+  public setMap(map: Map): void {
     this._map = map;
     this.switchTheme('LIGHT');
   }
 
-  switchTheme(theme: TileTheme) {
+  public switchTheme(theme: TileTheme) {
     this._theme.clearLayers();
 
     const lightTheme = tileLayer(DFEAULT_TILE_LAYER_THEME);
@@ -44,25 +40,18 @@ export class MapService {
 
     if (theme === 'LIGHT') {
       this._theme.addLayer(lightTheme);
-      this._theme$.next('LIGHT');
     } else {
       this._theme.addLayer(darkTheme);
-      this._theme$.next('DARK');
     }
 
+    this._theme$.next('LIGHT');
     this._map.addLayer(this._theme);
   }
 
   appendFuelStationToMap(fuelStation: FuelStationSummary): Circle {
     const circleLocation = circle(
-      {
-        lat: fuelStation.lat,
-        lng: fuelStation.lon,
-      },
-      {
-        radius: 10,
-        color: this.setFadeColorOnNumber(fuelStation.price_indication!),
-      }
+      {lat: fuelStation.lat, lng: fuelStation.lon},
+      {radius: 10, color: this.setFadeColorOnNumber(fuelStation.price_indication!)}
     );
 
     this._allMapLayers.addLayer(circleLocation);
@@ -77,7 +66,7 @@ export class MapService {
   }
 
   flyTo(lat: number, lng: number): void {
-    this._map.flyTo({ lat, lng }, 13, { animate: false });
+    this._map.flyTo({lat, lng}, 13, {animate: false});
   }
 
   clearMapLayers() {
@@ -86,7 +75,7 @@ export class MapService {
 
   centerBackToDefaultLocation() {
     this._map.flyTo(
-      { lat: DEFAULT_LATITUDE, lng: DEFAULT_LONGITUDE },
+      {lat: DEFAULT_LATITUDE, lng: DEFAULT_LONGITUDE},
       DEFAULT_ZOOM,
       {
         animate: false,

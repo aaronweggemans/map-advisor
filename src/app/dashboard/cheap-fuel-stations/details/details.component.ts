@@ -17,7 +17,7 @@ export class DetailsComponent {
     this._foundGasStation$.next(gasStationId);
   }
 
-  private _toBarChartData = (fuelStation: FuelStation) => ({
+  private readonly _toBarChartData = (fuelStation: FuelStation) => ({
     ...fuelStation,
     barChartData: {
       labels: fuelStation.prices.map((prices) => prices.fueltype),

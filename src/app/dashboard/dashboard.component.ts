@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
-import { MapComponent } from '../shared/components/map/map.component';
+import { MapComponent } from '../map/map.component';
 import { RouterOutlet } from '@angular/router';
-import { CheapFuelStationsComponent } from './cheap-fuel-stations/cheap-fuel-stations.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [MapComponent, RouterOutlet, CheapFuelStationsComponent],
+  imports: [MapComponent, RouterOutlet],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {}

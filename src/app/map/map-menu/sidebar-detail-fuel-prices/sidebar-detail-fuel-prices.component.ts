@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { tap } from 'rxjs';
 import { MapService } from '../../map.service';
 import { TileTheme } from '../../map.component.models';
 
@@ -17,7 +16,7 @@ export class SidebarDetailFuelPricesComponent {
 
   constructor(private _mapService: MapService) {}
 
-  public centerToDefaultLocation() {
+  protected centerToDefaultLocation(): void {
     this._mapService.clearMapLayers();
     this._mapService.centerBackToDefaultLocation();
     this.closeSidebar.emit();

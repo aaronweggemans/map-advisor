@@ -1,0 +1,27 @@
+.sidebar {
+  position: fixed;
+  z-index: 500;
+  right: 0;
+  margin: 10px;
+  height: calc(100% - 20px);
+  width: 35%;
+}
+
+.blur-effect {
+  backdrop-filter: blur(6px);
+}
+
+.font-weight-bold {
+  font-weight:bolder;
+}
+
+// Tablet size
+@media (max-width:960px) {
+  .sidebar {
+    position: absolute;
+    /* height: calc(100% - 20px); */
+    width: 90%;
+    left: 40%;
+    transform: translate(-40%, 80%);
+  }
+}

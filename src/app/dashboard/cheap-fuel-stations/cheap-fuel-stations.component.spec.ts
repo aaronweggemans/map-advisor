@@ -1,5 +1,5 @@
 import { ActivatedRoute } from '@angular/router';
-import { MapService } from '../../shared/components/map/map.service';
+import { MapService } from '../../map/map.service';
 import { CheapFuelStationsComponent } from './cheap-fuel-stations.component';
 import {
   Spectator,

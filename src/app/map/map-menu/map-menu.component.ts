@@ -14,18 +14,19 @@ import { TileTheme } from '../map.component.models';
 export class MapMenuComponent {
   @Input() theme: TileTheme = 'LIGHT';
 
-  openendSidebar: SidebarDetails = {
-    fuelPrices: false,
-  };
+  openendSidebar: SidebarDetails = { fuelPrices: false };
 
-  openOrCloseSidebar() {
-    this.openendSidebar = {
-      ...this.openendSidebar,
-      fuelPrices: !this.openendSidebar.fuelPrices,
-    };
+  protected openOrCloseSidebar(): false {
+    this.openendSidebar = { ...this.openendSidebar, fuelPrices: !this.openendSidebar.fuelPrices };
+    return false;
+  }
+
+  protected closeSidebar(): false {
+    this.openendSidebar = { ...this.closeSidebar, fuelPrices: false };
+    return false;
   }
 }
 
-interface SidebarDetails {
+type SidebarDetails = {
   fuelPrices: boolean;
 }

@@ -1,0 +1,56 @@
+<div class="list-group rounded">
+  <a
+    class="list-group-item list-group-item-action"
+    [class]="theme === 'LIGHT' ? 'white-layout' : 'black-layout'"
+    (click)="centerToDefaultLocation()"
+    routerLink="/cheap-fuel-stations/lpg"
+    routerLinkActive="active"
+  >
+    Find on LPG
+  </a>
+  <a
+    class="list-group-item list-group-item-action"
+    [class]="theme === 'LIGHT' ? 'white-layout' : 'black-layout'"
+    (click)="centerToDefaultLocation()"
+    routerLink="/cheap-fuel-stations/cng"
+    routerLinkActive="active"
+  >
+    Find on cng (CNG)
+  </a>
+  <a
+    class="list-group-item list-group-item-action"
+    [class]="theme === 'LIGHT' ? 'white-layout' : 'black-layout'"
+    (click)="centerToDefaultLocation()"
+    routerLink="/cheap-fuel-stations/diesel"
+    routerLinkActive="active"
+  >
+    Find on diesel (Diesel B7)
+  </a>
+  <a
+    class="list-group-item list-group-item-action"
+    [class]="theme === 'LIGHT' ? 'white-layout' : 'black-layout'"
+    (click)="centerToDefaultLocation()"
+    routerLink="/cheap-fuel-stations/premium_diesel"
+    routerLinkActive="active"
+  >
+    Find on premium diesel
+  </a>
+  <a
+    class="list-group-item list-group-item-action"
+    [class]="theme === 'LIGHT' ? 'white-layout' : 'black-layout'"
+    (click)="centerToDefaultLocation()"
+    routerLink="/cheap-fuel-stations/euro98"
+    routerLinkActive="active"
+  >
+    Find on euro 95
+  </a>
+  <a
+    class="list-group-item list-group-item-action"
+    [class]="theme === 'LIGHT' ? 'white-layout' : 'black-layout'"
+    (click)="centerToDefaultLocation()"
+    routerLink="/cheap-fuel-stations/euro95"
+    routerLinkActive="active"
+  >
+    Find on euro 98
+  </a>
+</div>
