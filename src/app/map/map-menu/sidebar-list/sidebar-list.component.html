@@ -1,0 +1,12 @@
+<div class="list-group rounded">
+  <a
+    (click)="centerToDefaultLocation()"
+    *ngFor="let item of list"
+    [class]="theme === 'LIGHT' ? 'white-layout' : 'black-layout'"
+    [routerLink]="item.url"
+    class="list-group-item list-group-item-action"
+    routerLinkActive="active"
+  >
+    {{ item.title }}
+  </a>
+</div>
