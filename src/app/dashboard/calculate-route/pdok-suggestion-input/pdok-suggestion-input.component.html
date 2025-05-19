@@ -1,0 +1,23 @@
+<div
+  *ngIf="{ suggestions: suggestions$ | async, showSuggestions: showSuggestions$ | async } as context"
+  class="position-relative"
+>
+  <label for="start_point">{{ title }}</label>
+  <input
+    [formControl]="suggestionInput"
+    [placeholder]="placeholder"
+    aria-describedby="startPlace"
+    autocomplete="off"
+    class="form-control"
+    id="start_point"
+    type="text"
+  />
+  <ul *ngIf="context.suggestions && context.showSuggestions" class="list-group position-fixed z-2">
+    <button
+      (click)="selectSuggestion(suggestion)"
+      *ngFor="let suggestion of context.suggestions"
+      class="list-group-item list-group-item-action">
+      {{ suggestion.weergavenaam }}
+    </button>
+  </ul>
+</div>

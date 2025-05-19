@@ -1,5 +1,16 @@
 import {Injectable} from '@angular/core';
-import {Circle, circle, layerGroup, Map, tileLayer} from 'leaflet';
+import {
+  Circle,
+  circle, GeoJSON, geoJSON,
+  icon,
+  LatLngExpression,
+  layerGroup,
+  Map,
+  marker,
+  Marker, Polyline,
+  polyline,
+  tileLayer
+} from 'leaflet';
 import {FuelStationSummary} from '../dashboard/cheap-fuel-stations/cheap-fuel-stations.models';
 import {
   DARK_TILE_LAYER_THEME,
@@ -8,8 +19,10 @@ import {
   DEFAULT_ZOOM,
   DFEAULT_TILE_LAYER_THEME,
 } from '../app.contants';
-import {TileTheme} from './map.component.models';
+import {ROUTE_LOCATION, TileTheme} from './map.component.models';
 import {BehaviorSubject, Observable, Subject, takeUntil} from 'rxjs';
+import {buffer, lineString} from '@turf/turf';
+import {Feature, LineString, Position} from 'geojson';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +31,11 @@ export class MapService {
   private _map!: Map;
   private _allMapLayers = layerGroup();
   private _theme = layerGroup();
+  private pdokFoundOnAddressLayerA = layerGroup();
+  private pdokFoundOnAddressLayerB = layerGroup();
+
+  private bufferLayer: GeoJSON | null = null;
+  private turfLine: Feature<LineString> | null = null;
 
   private readonly _onDestroy$ = new Subject<void>();
 
@@ -65,9 +83,52 @@ export class MapService {
     return circleLocation;
   }
 
-  flyTo(lat: number, lng: number): void {
-    this._map.flyTo({lat, lng}, 13, {animate: false});
+  flyTo(lat: number, lng: number, zoom = 13): void {
+    this._map.flyTo({ lat, lng }, zoom, { animate: true });
   }
+
+  /**
+   * Dit moet echt mooier.
+   * @param lat
+   * @param lng
+   * @param layer
+   */
+  appendMarker(lat: number, lng: number, layer: ROUTE_LOCATION) {
+    if(this.pdokFoundOnAddressLayerA.getLayers() && layer === ROUTE_LOCATION.LOCATION_A) {
+      this.pdokFoundOnAddressLayerA.clearLayers();
+    }
+
+    if(this.pdokFoundOnAddressLayerB.getLayers() && layer === ROUTE_LOCATION.LOCATION_B) {
+      this.pdokFoundOnAddressLayerB.clearLayers();
+    }
+
+    const customMarker = icon({ iconUrl: 'assets/map-assets/marker.png',  iconSize: [35, 35],  iconAnchor: [15, 35] });
+    const markerLocation: Marker = marker([lat, lng], { icon: customMarker });
+
+    if(layer === ROUTE_LOCATION.LOCATION_A) {
+      this.pdokFoundOnAddressLayerA.addLayer(markerLocation);
+      this._map.addLayer(this.pdokFoundOnAddressLayerA);
+    }
+
+    if(layer === ROUTE_LOCATION.LOCATION_B) {
+      this.pdokFoundOnAddressLayerB.addLayer(markerLocation);
+      this._map.addLayer(this.pdokFoundOnAddressLayerB);
+    }
+  }
+
+  public drawPolyLine(route: number[][]) {
+    const latLngCasting = route.map((latlng) => [latlng[1], latlng[0]]);
+    const routeLine: Polyline = polyline(latLngCasting as LatLngExpression[], { color: '#4787B4',  weight: 5, opacity: 0.8 }).addTo(this._map);
+    this._map.fitBounds(routeLine.getBounds());
+    this.turfLine = lineString(route as Position[]);
+  }
+
+  public appendBufferToPolyLine(radius: number): void {
+    const bufferRadius = buffer(this.turfLine!, radius / 1000, { units: 'kilometers' });
+    if (this.bufferLayer) { this._map.removeLayer(this.bufferLayer); }
+    this.bufferLayer = geoJSON(bufferRadius, { style: { color: '#5C636B', weight: 5, fillOpacity: 0.3 }}).addTo(this._map);
+  }
+
 
   clearMapLayers() {
     this._allMapLayers.clearLayers();

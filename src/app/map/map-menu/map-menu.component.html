@@ -1,14 +1,21 @@
 <div class="position-fixed map-overlay menu-position align-middle">
   <form class="btn-group-vertical">
-    <a class="btn btn-secondary" routerLink="/dashboard" routerLinkActive="active" (click)="closeSidebar()">
+    <a (click)="closeSidebar()" class="btn btn-secondary" routerLink="/dashboard" routerLinkActive="active">
       <i class="fa fa-home fa-sm m-2" aria-hidden="true"></i>
     </a>
-    <a href="#" class="btn btn-secondary" (click)="openOrCloseSidebar()">
+    <a (click)="openOrClose('fuelPrices')" class="btn btn-secondary" href="#">
       <i class="fa fa-car fa-sm m-2" aria-hidden="true"></i>
+    </a>
+    <a (click)="openOrClose('drawing')" class="btn btn-secondary" href="#">
+      <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
     </a>
   </form>
 </div>
 
-<div class="position-fixed map-overlay sidebar-position align-middle" *ngIf="openendSidebar.fuelPrices">
-  <app-sidebar-detail-fuel-prices [theme]="theme" (closeSidebar)="openOrCloseSidebar()"></app-sidebar-detail-fuel-prices>
+<div *ngIf="openedSidebar.fuelPrices" class="position-fixed map-overlay sidebar-position align-middle">
+  <app-sidebar-list [list]="SIDE_BAR_FUEL_PRICES" [theme]="theme" (closeSidebar)="closeSidebar()"></app-sidebar-list>
+</div>
+
+<div *ngIf="openedSidebar.drawing" class="position-fixed map-overlay sidebar-position align-middle">
+  <app-sidebar-list [list]="SIDE_BAR_DRAW" [theme]="theme" (closeSidebar)="closeSidebar()"></app-sidebar-list>
 </div>
