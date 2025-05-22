@@ -1,0 +1,14 @@
+<div *ngIf="results.length > 0">
+  <hr />
+
+  <div class="row g-0 position-relative my-2" *ngFor="let fuelStation of results">
+    <div class="col-md-6 mb-md-0 p-md-4">
+      <img src="./assets/img/location-placeholder.jpg" class="w-100" alt="placeholder">
+    </div>
+    <div class="col-md-6 p-4 ps-md-0">
+      <h5 class="mt-0">Unique id {{ fuelStation.id }}</h5>
+      <p>Prices {{ fuelStation.price }}</p>
+      <a href="#" class="stretched-link">Make route</a>
+    </div>
+  </div>
+</div>

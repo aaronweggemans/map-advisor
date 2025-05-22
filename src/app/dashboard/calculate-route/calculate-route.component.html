@@ -1,41 +1,27 @@
-<ng-container *ngIf="{ showRadius: showAdditionalInformation$ | async, explanation: explanation$ | async } as context">
-  <p class="mt-2 fw-bold text-center">FIND THE CHEAPEST FUEL STATION ON YOUR ROUTE</p>
-  <p class="text-center">
-    Below you can enter your location, or when pressing the button on the right top of the map, you
-    can click on a location to select a starting point.
-  </p>
-  <p class="text-center">Please select a fuelstation on the map to get information.</p>
+<p class="mt-2 fw-bold text-center">FIND THE CHEAPEST FUEL STATION ON YOUR ROUTE</p>
+<p class="text-center">
+  Below you can enter your location, or when pressing the button on the right top of the map, you
+  can click on a location to select a starting point.
+</p>
+<p class="text-center">Please select a fuelstation on the map to get information.</p>
 
-  <div class="my-4">
-    <form (ngSubmit)="onFormSubmit()" [formGroup]="form">
-      <div class="form-group mb-3">
-        <app-pdok-suggestion-input formControlName='start' title="Please enter a starting point"></app-pdok-suggestion-input>
-      </div>
-      <div class="form-group mb-3">
-        <app-pdok-suggestion-input formControlName='end' title="Please enter a ending point"></app-pdok-suggestion-input>
-      </div>
-      <div *ngIf="context.showRadius" class="form-group mb-3">
-        <label class="form-label" for="Radius">Radius {{ radius.value === 0 ? '' : '(' + radius.value + ' meters)' }}</label>
-        <input class="form-range" formControlName="radius" id="Radius" max="2000" min="0" type="range" value="0">
-      </div>
-      <div *ngIf="context.showRadius" class="form-group mb-3">
-        <label class="form-label" for="amount">Amount of tank stations</label>
-        <input class="form-control" formControlName="amount" id="amount" type="number"/>
-      </div>
-      <div class="form-group mb-3">
-        <button class="btn btn-secondary" [attr.disabled]="radius.value === 0 || form.invalid || undefined">Submit</button>
-      </div>
-    </form>
+<div class="my-4">
+  <app-calculate-form
+    (getORSProperties)="ORSProperties = $event"
+    (getFuelStations)="fuelStations = $event"
+  >
+  </app-calculate-form>
 
-    <ul *ngIf="context.explanation" class="list-group">
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        Total distance:
-        <span class="badge badge-primary badge-pill text-secondary">{{ context.explanation.summary.distance }}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        Total duration:
-        <span class="badge badge-primary badge-pill text-secondary">{{ context.explanation.summary.duration }}</span>
-      </li>
-    </ul>
-  </div>
-</ng-container>
+  <ul *ngIf="ORSProperties" class="list-group">
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      Total distance:
+      <span class="badge badge-primary badge-pill text-secondary">{{ ORSProperties.summary.distance }}</span>
+    </li>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      Total duration:
+      <span class="badge badge-primary badge-pill text-secondary">{{ ORSProperties.summary.duration }}</span>
+    </li>
+  </ul>
+
+  <app-search-results [results]="fuelStations"></app-search-results>
+</div>

@@ -1,15 +1,5 @@
 <ng-container *ngIf="isLoading$ | async; else content">
-  <ngx-loading
-    [show]="true"
-    [config]="{ 
-      backdropBorderRadius: '3px', 
-      backdropBackgroundColour: 'rgba(0,0,0,0)',
-      primaryColour: 'rgb(255, 99, 132)',
-      secondaryColour: 'rgb(255, 159, 64)',
-      tertiaryColour: 'rgb(255, 205, 86)',
-    }"
-    [template]="loadingContent"
-  ></ngx-loading>
+  <ngx-loading [show]="true" [config]="DEFAULT_LOADING_SETTINGS" [template]="loadingContent"></ngx-loading>
 </ng-container>
 
 <ng-template #content>

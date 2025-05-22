@@ -16,7 +16,8 @@
     <button
       (click)="selectSuggestion(suggestion)"
       *ngFor="let suggestion of context.suggestions"
-      class="list-group-item list-group-item-action">
+      class="list-group-item list-group-item-action"
+    >
       {{ suggestion.weergavenaam }}
     </button>
   </ul>

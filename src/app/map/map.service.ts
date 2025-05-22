@@ -3,7 +3,7 @@ import {
   Circle,
   circle, GeoJSON, geoJSON,
   icon,
-  LatLngExpression,
+  LatLngExpression, LayerGroup,
   layerGroup,
   Map,
   marker,
@@ -23,18 +23,23 @@ import {ROUTE_LOCATION, TileTheme} from './map.component.models';
 import {BehaviorSubject, Observable, Subject, takeUntil} from 'rxjs';
 import {buffer, lineString} from '@turf/turf';
 import {Feature, LineString, Position} from 'geojson';
+import {Coordinates} from "../dashboard/calculate-route/calculate-route.models";
 
 @Injectable({
   providedIn: 'root',
 })
 export class MapService {
   private _map!: Map;
+  private routeMarkers: Partial<Record<ROUTE_LOCATION, Marker>> = {};
+
   private _allMapLayers = layerGroup();
   private _theme = layerGroup();
-  private pdokFoundOnAddressLayerA = layerGroup();
-  private pdokFoundOnAddressLayerB = layerGroup();
+  private PDOKLayer = layerGroup();
+  private turfLineLayer: Polyline | null = null;
 
-  private bufferLayer: GeoJSON | null = null;
+  private _allPlacedFuelStations: LayerGroup = layerGroup();
+
+  public bufferLayer: GeoJSON | null = null;
   private turfLine: Feature<LineString> | null = null;
 
   private readonly _onDestroy$ = new Subject<void>();
@@ -44,6 +49,8 @@ export class MapService {
 
   private readonly _theme$: BehaviorSubject<TileTheme> = new BehaviorSubject<TileTheme>('LIGHT');
   public readonly theme$: Observable<TileTheme> = this._theme$.asObservable();
+
+  private fuelStations: FuelStationSummary[] = [];
 
   public setMap(map: Map): void {
     this._map = map;
@@ -66,67 +73,78 @@ export class MapService {
     this._map.addLayer(this._theme);
   }
 
-  appendFuelStationToMap(fuelStation: FuelStationSummary): Circle {
-    const circleLocation = circle(
+  appendFuelStationToLayer(fuelStation: FuelStationSummary) {
+    const appendCirclesToMapLayer = circle(
       {lat: fuelStation.lat, lng: fuelStation.lon},
       {radius: 10, color: this.setFadeColorOnNumber(fuelStation.price_indication!)}
     );
 
-    this._allMapLayers.addLayer(circleLocation);
-    this._map.addLayer(this._allMapLayers);
+    appendCirclesToMapLayer.addTo(this._allPlacedFuelStations)
+  }
 
-    circleLocation.on('click', () => {
-      this._foundGasStationId$.next(fuelStation.id);
-      this.flyTo(fuelStation.lat, fuelStation.lon);
+  public clearDots() {
+    if (this._allPlacedFuelStations) this._map.removeLayer(this._allPlacedFuelStations);
+  }
+
+  public appendAllFuelStationSummaries(fuelStations: FuelStationSummary[], amount: number) {
+    if (this._allPlacedFuelStations) this._map.removeLayer(this._allPlacedFuelStations);
+    this._allPlacedFuelStations = layerGroup();
+    this.fuelStations = fuelStations.sort((a, b) => a.price - b.price);
+    const amountOfFuelStations = fuelStations.slice(0, amount)
+    const fuelStationSummaries = this._calculatePriceIndication(amountOfFuelStations);
+    fuelStationSummaries.forEach((fuelStation) => this.appendFuelStationToLayer(fuelStation));
+    this._allPlacedFuelStations.addTo(this._map);
+  }
+
+  public appendOrRemoveFuelStation(amount: number): void {
+    if (this._allPlacedFuelStations) this._map.removeLayer(this._allPlacedFuelStations);
+    this._allPlacedFuelStations = layerGroup();
+    const amountOfFuelStations = this.fuelStations.slice(0, amount)
+    const fuelStationSummaries = this._calculatePriceIndication(amountOfFuelStations);
+    fuelStationSummaries.forEach((fuelStation) => this.appendFuelStationToLayer(fuelStation));
+    this._allPlacedFuelStations.addTo(this._map);
+  }
+
+  flyTo(coordinates: Coordinates): void {
+    this._map.flyTo([coordinates.lat, coordinates.lon], 13, {animate: true});
+  }
+
+  appendMarker(lat: number, lng: number, layer: ROUTE_LOCATION) {
+    if (this.turfLineLayer) this._map.removeLayer(this.turfLineLayer);
+    if (this.bufferLayer) this._map.removeLayer(this.bufferLayer);
+
+    const existingMarker = this.routeMarkers[layer];
+    if (existingMarker) {
+      this._map.removeLayer(existingMarker);
+      delete this.routeMarkers[layer];
+    }
+
+    // Maak nieuwe marker aan
+    const customMarker = icon({
+      iconUrl: 'assets/map-assets/marker.png',
+      iconSize: [35, 35],
+      iconAnchor: [15, 35]
     });
 
-    return circleLocation;
-  }
+    const newMarker = marker([lat, lng], { icon: customMarker });
+    newMarker.addTo(this.PDOKLayer);
+    this.PDOKLayer.addTo(this._map);
 
-  flyTo(lat: number, lng: number, zoom = 13): void {
-    this._map.flyTo({ lat, lng }, zoom, { animate: true });
-  }
-
-  /**
-   * Dit moet echt mooier.
-   * @param lat
-   * @param lng
-   * @param layer
-   */
-  appendMarker(lat: number, lng: number, layer: ROUTE_LOCATION) {
-    if(this.pdokFoundOnAddressLayerA.getLayers() && layer === ROUTE_LOCATION.LOCATION_A) {
-      this.pdokFoundOnAddressLayerA.clearLayers();
-    }
-
-    if(this.pdokFoundOnAddressLayerB.getLayers() && layer === ROUTE_LOCATION.LOCATION_B) {
-      this.pdokFoundOnAddressLayerB.clearLayers();
-    }
-
-    const customMarker = icon({ iconUrl: 'assets/map-assets/marker.png',  iconSize: [35, 35],  iconAnchor: [15, 35] });
-    const markerLocation: Marker = marker([lat, lng], { icon: customMarker });
-
-    if(layer === ROUTE_LOCATION.LOCATION_A) {
-      this.pdokFoundOnAddressLayerA.addLayer(markerLocation);
-      this._map.addLayer(this.pdokFoundOnAddressLayerA);
-    }
-
-    if(layer === ROUTE_LOCATION.LOCATION_B) {
-      this.pdokFoundOnAddressLayerB.addLayer(markerLocation);
-      this._map.addLayer(this.pdokFoundOnAddressLayerB);
-    }
+    this.routeMarkers[layer] = newMarker;
   }
 
   public drawPolyLine(route: number[][]) {
     const latLngCasting = route.map((latlng) => [latlng[1], latlng[0]]);
-    const routeLine: Polyline = polyline(latLngCasting as LatLngExpression[], { color: '#4787B4',  weight: 5, opacity: 0.8 }).addTo(this._map);
-    this._map.fitBounds(routeLine.getBounds());
+    this.turfLineLayer = polyline(latLngCasting as LatLngExpression[], { color: '#4787B4',  weight: 5, opacity: 0.8 });;
+    this.turfLineLayer.addTo(this._map);
+    this._map.fitBounds(this.turfLineLayer.getBounds());
     this.turfLine = lineString(route as Position[]);
   }
 
   public appendBufferToPolyLine(radius: number): void {
-    const bufferRadius = buffer(this.turfLine!, radius / 1000, { units: 'kilometers' });
-    if (this.bufferLayer) { this._map.removeLayer(this.bufferLayer); }
-    this.bufferLayer = geoJSON(bufferRadius, { style: { color: '#5C636B', weight: 5, fillOpacity: 0.3 }}).addTo(this._map);
+    const bufferRadius = buffer(this.turfLine!, radius / 1000, {units: 'kilometers'});
+    if (this.bufferLayer) this._map.removeLayer(this.bufferLayer);
+    this.bufferLayer = geoJSON(bufferRadius, {style: {color: '#5C636B', weight: 5, fillOpacity: 0.3}}).addTo(this._map);
   }
 
 
@@ -152,5 +170,15 @@ export class MapService {
     const value = percentage / 100;
     const hue = ((1 - value) * 120).toString(10);
     return ['hsl(', hue, ',100%,50%)'].join('');
+  }
+
+  private _calculatePriceIndication(fuelStations: FuelStationSummary[]): FuelStationSummary[] {
+    const highestCosts = Math.max(...fuelStations.map((station) => station.price));
+    const lowestCosts = Math.min(...fuelStations.map((station) => station.price));
+
+    return fuelStations.map((station: FuelStationSummary) => ({
+      ...station,
+      price_indication: Math.floor(((station.price - lowestCosts) / (highestCosts - lowestCosts)) * 100),
+    })).sort((a, b) => a.price_indication - b.price_indication);
   }
 }

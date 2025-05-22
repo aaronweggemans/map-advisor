@@ -6,9 +6,6 @@
     <a (click)="openOrClose('fuelPrices')" class="btn btn-secondary" href="#">
       <i class="fa fa-car fa-sm m-2" aria-hidden="true"></i>
     </a>
-    <a (click)="openOrClose('drawing')" class="btn btn-secondary" href="#">
-      <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-    </a>
   </form>
 </div>
 
@@ -16,6 +13,3 @@
   <app-sidebar-list [list]="SIDE_BAR_FUEL_PRICES" [theme]="theme" (closeSidebar)="closeSidebar()"></app-sidebar-list>
 </div>
 
-<div *ngIf="openedSidebar.drawing" class="position-fixed map-overlay sidebar-position align-middle">
-  <app-sidebar-list [list]="SIDE_BAR_DRAW" [theme]="theme" (closeSidebar)="closeSidebar()"></app-sidebar-list>
-</div>

@@ -31,12 +31,12 @@ export class CalculateRouteService {
       .pipe(map(this.toAddressSuggestion));
   }
 
-  public getLocation(id: string): Observable<PDOKAddress> {
+  public getLocation(id: string): Observable<Coordinates> {
     const params = new HttpParams().set('id', id);
 
     return this.httpClient
       .get<PDOKSuggestedAddressDto>(`${environment.locationUrl}/lookup`, { params })
-      .pipe(map(this.toAddress));
+      .pipe(map(this.toAddress), map(({ coordinates }) => coordinates));
   }
 
   public getRoute(from: Coordinates, to: Coordinates): Observable<ORSRoutePlan> {
