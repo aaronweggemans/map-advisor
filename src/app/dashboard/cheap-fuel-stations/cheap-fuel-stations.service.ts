@@ -7,6 +7,7 @@ import {
 } from './cheap-fuel-stations.models';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../environments/environment.development';
+import {Position} from "geojson";
 
 @Injectable({
   providedIn: 'root',
@@ -29,6 +30,12 @@ export class CheapFuelStationsService {
       .pipe(map(this._toFuelStation));
   }
 
+  public getAllFuelStationsOnCoordinates(coordinates: Position[][], fueltype: string): Observable<FuelStationSummary[]> {
+    const body = this.coordinatesToBody(coordinates);
+    return this.httpClient.post<FuelStationSummaryDTO[]>(`${environment.url}api/v1/fuel-stations/${fueltype}/coordinates`, body)
+      .pipe(map(this._toFuelStationSummary));
+  }
+
   private _toFuelStationSummary = (
     fuelStation: FuelStationSummaryDTO[]
   ): FuelStationSummary[] =>
@@ -37,7 +44,7 @@ export class CheapFuelStationsService {
       lat: fuelStation.location_lat,
       lon: fuelStation.location_lon,
       price: fuelStation.price,
-    }));
+    })).sort((fuelStation) => fuelStation.price);
 
   private _toFuelStation = (fuelStation: FuelStationDTO): FuelStation => ({
     ...fuelStation,
@@ -56,6 +63,10 @@ export class CheapFuelStationsService {
   });
 
   private _toPrices = (prices: PricesDTO[]) => prices.map((prices) => prices);
+
+  private readonly coordinatesToBody = (coordinates: Position[][]): CoordinatesBody => ({
+    coordinates: coordinates[0].map((coord) => ({ latitude: coord[1], longitude: coord[0] }))
+  })
 }
 
 type FuelStationSummaryDTO = {
@@ -95,4 +106,11 @@ type PricesDTO = {
   price_level: string;
   record: string;
   source: string;
+}
+
+type CoordinatesBody = {
+  coordinates: {
+    latitude: number
+    longitude: number
+  }[]
 }

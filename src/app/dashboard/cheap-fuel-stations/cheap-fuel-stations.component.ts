@@ -19,6 +19,7 @@ import {NgxLoadingModule} from 'ngx-loading';
 import {ActivatedRoute, Params} from '@angular/router';
 import {NotifierService} from 'angular-notifier';
 import {DetailsComponent} from './details/details.component';
+import {DEFAULT_LOADING_SETTINGS} from "../../app.contants";
 
 @Component({
   selector: 'app-cheap-fuel-stations',
@@ -64,7 +65,6 @@ export class CheapFuelStationsComponent implements OnInit, OnDestroy {
               return EMPTY;
             }),
             map(this._calculatePriceIndication),
-            tap(this._appendGasStationsToMap.bind(this))
           );
         })
       )
@@ -90,10 +90,6 @@ export class CheapFuelStationsComponent implements OnInit, OnDestroy {
     ['euro95', 'euro95'],
   ]);
 
-  private readonly _appendGasStationsToMap = (fuelStations: FuelStationSummary[]) => {
-    fuelStations.forEach((fuelStation) => this._mapService.appendFuelStationToMap(fuelStation));
-  };
-
   private _calculatePriceIndication(fuelStations: FuelStationSummary[]): FuelStationSummary[] {
     const highestCosts = Math.max(...fuelStations.map((station) => station.price));
     const lowestCosts = Math.min(...fuelStations.map((station) => station.price));
@@ -103,4 +99,6 @@ export class CheapFuelStationsComponent implements OnInit, OnDestroy {
       price_indication: Math.floor(((station.price - lowestCosts) / (highestCosts - lowestCosts)) * 100),
     }));
   }
+
+  protected readonly DEFAULT_LOADING_SETTINGS = DEFAULT_LOADING_SETTINGS;
 }

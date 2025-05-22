@@ -16,19 +16,11 @@ export class MapMenuComponent {
   @Input() theme: TileTheme = 'LIGHT';
 
   protected readonly SIDE_BAR_FUEL_PRICES: SidebarItem[] = [
-    { url: "/cheap-fuel-stations/lpg", title: "Find on LPG" },
-    { url: "/cheap-fuel-stations/cng", title: "Find on cng (CNG)" },
-    { url: "/cheap-fuel-stations/diesel", title: "Find on diesel (Diesel B7)" },
-    { url: "/cheap-fuel-stations/premium_diesel", title: "Find on premium diesel" },
-    { url: "/cheap-fuel-stations/euro98", title: "Find on euro 95" },
-    { url: "/cheap-fuel-stations/euro95", title: "Find on euro 98 "},
-  ];
-
-  protected readonly SIDE_BAR_DRAW: SidebarItem[] = [
+    { url: "/cheap-fuel-stations/lpg", title: "Find on coordinates" },
     { url: "/calculate-route-for-cheap-fuel-stations", title: "Find fuel station on route" },
   ];
 
-  protected openedSidebar: SidebarDetails = { fuelPrices: false, drawing: false };
+  protected openedSidebar: SidebarDetails = { fuelPrices: false};
 
   protected openOrClose(sidebarOption: SidebarOptions): false {
     this.closeSidebar();
@@ -37,7 +29,7 @@ export class MapMenuComponent {
   }
 
   protected closeSidebar(): false {
-    this.openedSidebar = { fuelPrices: false, drawing: false };
+    this.openedSidebar = { fuelPrices: false };
     return false;
   }
 }
@@ -46,5 +38,4 @@ type SidebarOptions = keyof SidebarDetails;
 
 type SidebarDetails = {
   fuelPrices: boolean;
-  drawing: boolean;
 }

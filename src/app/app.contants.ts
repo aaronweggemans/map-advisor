@@ -5,3 +5,11 @@ export const DFEAULT_TILE_LAYER_THEME =
   'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 export const DARK_TILE_LAYER_THEME =
   'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+
+export const DEFAULT_LOADING_SETTINGS = {
+  backdropBorderRadius: '3px',
+  backdropBackgroundColour: 'rgba(0,0,0,0)',
+  primaryColour: 'rgb(255, 99, 132)',
+  secondaryColour: 'rgb(255, 159, 64)',
+  tertiaryColour: 'rgb(255, 205, 86)',
+}
