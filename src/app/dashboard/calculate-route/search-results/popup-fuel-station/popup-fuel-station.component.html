@@ -1,0 +1,50 @@
+<div class="card bg-transparent border-0" *ngIf="activeTab$ | async as activeTab">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h1 class="m-0">{{ fuelStation.brand_name }}</h1>
+      <span class="badge bg-secondary rounded-pill">Unique id: {{ fuelStation.id }}</span>
+    </div>
+    <p class="card-text">From 1 to 100, a indication is set on the selected fuel price. This fuel station is marked with number 13.</p>
+    <a href="#" class="card-link">Google maps</a>
+    <nav class="nav nav-tabs mb-2">
+      <a (click)="switchContent($event, 'general')" [class.active]="activeTab === 'general'"
+         class="nav-item nav-link" href="#">Home</a>
+      <a (click)="switchContent($event, 'prices')" [class.active]="activeTab === 'prices'"
+         class="nav-item nav-link" href="#">Prices</a>
+    </nav>
+    <div class="tab-content">
+      <div *ngIf="activeTab === 'general'">
+        <p class="card-text">General information about this fuel station:</p>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">Street: {{ fuelStation.street }}</li>
+          <li class="list-group-item">Postalcode: {{ fuelStation.postal_code }}</li>
+          <li class="list-group-item">City: {{ fuelStation.city }}</li>
+        </ul>
+      </div>
+      <div *ngIf="activeTab === 'prices'">
+        <p class="card-text">The found prices for this fuel fuel station.</p>
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <td>ID</td>
+            <td>Fuel Type</td>
+            <td>Source</td>
+            <td>Price</td>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let price of fuelStation.prices">
+            <td>{{ price.id }}</td>
+            <td>{{ price.fueltype }}</td>
+            <td>{{ price.source }}</td>
+            <td>{{ price.price }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer">
+    <small class="text-muted">Last updated mins ago</small>
+  </div>
+</div>

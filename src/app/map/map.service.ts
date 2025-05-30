@@ -1,7 +1,8 @@
 import {Injectable} from '@angular/core';
 import {
-  Circle,
-  circle, GeoJSON, geoJSON,
+  circle,
+  GeoJSON,
+  geoJSON,
   icon,
   LatLngExpression, LayerGroup,
   layerGroup,
@@ -9,7 +10,8 @@ import {
   marker,
   Marker, Polyline,
   polyline,
-  tileLayer
+  popup,
+  tileLayer,
 } from 'leaflet';
 import {FuelStationSummary} from '../dashboard/cheap-fuel-stations/cheap-fuel-stations.models';
 import {
@@ -76,10 +78,17 @@ export class MapService {
   appendFuelStationToLayer(fuelStation: FuelStationSummary) {
     const appendCirclesToMapLayer = circle(
       {lat: fuelStation.lat, lng: fuelStation.lon},
-      {radius: 10, color: this.setFadeColorOnNumber(fuelStation.price_indication!)}
+      {radius: 20, color: this.setFadeColorOnNumber(fuelStation.price_indication!)}
     );
 
     appendCirclesToMapLayer.addTo(this._allPlacedFuelStations)
+  }
+
+  openPopup(coordinates: Coordinates, content: string | HTMLElement) {
+    popup()
+      .setLatLng({ lat: coordinates.lat, lng: coordinates.lon })
+      .setContent(content)
+      .openOn(this._map);
   }
 
   public clearDots() {
@@ -135,7 +144,7 @@ export class MapService {
 
   public drawPolyLine(route: number[][]) {
     const latLngCasting = route.map((latlng) => [latlng[1], latlng[0]]);
-    this.turfLineLayer = polyline(latLngCasting as LatLngExpression[], { color: '#4787B4',  weight: 5, opacity: 0.8 });;
+    this.turfLineLayer = polyline(latLngCasting as LatLngExpression[], { color: '#4787B4',  weight: 5, opacity: 0.8 });
     this.turfLineLayer.addTo(this._map);
     this._map.fitBounds(this.turfLineLayer.getBounds());
     this.turfLine = lineString(route as Position[]);

@@ -23,5 +23,5 @@
     </li>
   </ul>
 
-  <app-search-results [results]="fuelStations"></app-search-results>
+  <app-search-results [results]="fuelStations" (selectedFuelStation)="fuelStationIsSelected($event)"></app-search-results>
 </div>

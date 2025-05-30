@@ -18,7 +18,7 @@ RUN npm run build --configuration=production
 
 FROM --platform=linux/arm64 nginx:latest
 
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf 
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build app/dist/map-advisor/* /usr/share/nginx/html
 
 EXPOSE 4200

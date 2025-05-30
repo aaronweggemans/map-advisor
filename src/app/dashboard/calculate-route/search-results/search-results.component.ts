@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FuelStationSummary} from "../../cheap-fuel-stations/cheap-fuel-stations.models";
 import {NgForOf, NgIf} from "@angular/common";
 
@@ -12,5 +12,11 @@ import {NgForOf, NgIf} from "@angular/common";
   templateUrl: './search-results.component.html',
 })
 export class SearchResultsComponent {
-  @Input({ required: true }) results!: FuelStationSummary[]
+  @Input({ required: true }) results!: FuelStationSummary[];
+  @Output() selectedFuelStation = new EventEmitter<FuelStationSummary>();
+
+  protected showFuelStationDetails(fuelStation: FuelStationSummary): false {
+    this.selectedFuelStation.emit(fuelStation)
+    return false;
+  }
 }
