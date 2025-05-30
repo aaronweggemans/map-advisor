@@ -16,13 +16,13 @@ import {ROUTE_LOCATION} from "../../../map/map.component.models";
 import {AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {CalculateRouteService} from "../calculate-route.service";
 import {MapService} from "../../../map/map.service";
-import {CheapFuelStationsService} from "../../cheap-fuel-stations/cheap-fuel-stations.service";
 import {NotifierService} from "angular-notifier";
 import { DEFAULT_LOADING_SETTINGS } from '../../../app.contants';
 import {PdokSuggestionInputComponent} from "../pdok-suggestion-input/pdok-suggestion-input.component";
 import {NgxLoadingModule} from "ngx-loading";
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 import {FuelStationSummary} from "../../cheap-fuel-stations/cheap-fuel-stations.models";
+import {DashboardService} from "../../dashboard.service";
 
 @Component({
   selector: 'app-calculate-form',
@@ -38,6 +38,8 @@ import {FuelStationSummary} from "../../cheap-fuel-stations/cheap-fuel-stations.
   templateUrl: './calculate-form.component.html',
 })
 export class CalculateFormComponent implements OnInit {
+  private fuelStations: FuelStationSummary[] = [];
+
   @Output() getORSProperties: EventEmitter<ORSProperties> = new EventEmitter<ORSProperties>();
   @Output() getFuelStations: EventEmitter<FuelStationSummary[]> = new EventEmitter<FuelStationSummary[]>();
 
@@ -64,7 +66,7 @@ export class CalculateFormComponent implements OnInit {
   constructor(
     private readonly calculateRouteService: CalculateRouteService,
     private readonly mapService: MapService,
-    private readonly cheapFuelStationService: CheapFuelStationsService,
+    private readonly dashboardService: DashboardService,
     private readonly notifierService: NotifierService
   ) {}
 
@@ -86,7 +88,8 @@ export class CalculateFormComponent implements OnInit {
     this.amount.valueChanges.pipe(
       distinctUntilChanged(),
       debounceTime(50),
-      tap((amount) => this.mapService.appendOrRemoveFuelStation(amount))
+      tap((amount) => this.mapService.appendOrRemoveFuelStation(amount)),
+      tap((amount) => this.getFuelStations.emit(this.fuelStations.slice(0, amount)))
     ).subscribe();
 
     combineLatest([this.locationA$, this.locationB$]).pipe(this.setRouteAndCenterMiddle.bind(this)).subscribe();
@@ -120,10 +123,11 @@ export class CalculateFormComponent implements OnInit {
 
       if (bufferLayer.type === "FeatureCollection" && bufferLayer.features[0].geometry.type === "Polygon") {
         const coordinates = bufferLayer.features[0].geometry.coordinates;
-        this.cheapFuelStationService.getAllFuelStationsOnCoordinates(coordinates, this.fuelType.value).pipe(
+        this.dashboardService.getAllFuelStationsOnCoordinates(coordinates, this.fuelType.value).pipe(
           catchError(this.handleError.bind(this)),
           tap((fuelStations) => {
-            this.getFuelStations.emit(fuelStations);
+            this.fuelStations = fuelStations;
+            this.getFuelStations.emit(fuelStations.slice(0, this.amount.value));
             this.mapService.appendAllFuelStationSummaries(fuelStations, this.amount.value)
             this._isLoading$.next(false)
             this._submitted$.next(true)
@@ -137,10 +141,7 @@ export class CalculateFormComponent implements OnInit {
     return of$.pipe(
       map(([a, b]) => ({ a, b })),
       switchMap(({ a, b }) => this.calculateRouteService.getRoute(a, b).pipe(
-        catchError((error) => {
-          this.notifierService.show({ type: 'error',  message: `Something went wrong: ${error.statusText}` });
-          return EMPTY;
-        }))
+        catchError(this.handleError.bind(this)))
       ),
       tap((data: ORSRoutePlan) => {
         this.mapService.drawPolyLine(data.geometry.coordinates);

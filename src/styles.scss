@@ -1,10 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
+$-white-background-with-opacity: rgba(255, 255, 255, 0.6) !important;
+$-white-background-with-opacity-for-popup: rgba(255, 255, 255, 0.8) !important;
+$-dark-background-with-opacity: rgba(38, 38, 38, 0.6) !important;
+$-blur-effect: blur(6px) !important;
+
 .white-layout {
-  background-color: rgba(255, 255, 255, 0.6) !important;
+  background-color: $-white-background-with-opacity;
 }
 
 .black-layout {
-  background-color: rgba(38, 38, 38, 0.6) !important;
+  background-color: $-dark-background-with-opacity;
   color: white !important;
 }
 
@@ -19,3 +24,20 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/** Popup manual desings */
+.leaflet-popup-content-wrapper {
+  position: relative !important;
+  width: 20vw !important;
+  backdrop-filter: $-blur-effect;
+  background-color: $-white-background-with-opacity-for-popup;
+}
+
+.leaflet-popup-content-wrapper .leaflet-popup-content {
+  width: auto !important;
+}
+
+.leaflet-popup-tip-container .leaflet-popup-tip {
+  backdrop-filter: $-blur-effect;
+  background-color: $-white-background-with-opacity-for-popup;
+}

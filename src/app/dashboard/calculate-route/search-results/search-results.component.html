@@ -1,14 +1,15 @@
 <div *ngIf="results.length > 0">
   <hr />
 
-  <div class="row g-0 position-relative my-2" *ngFor="let fuelStation of results">
-    <div class="col-md-6 mb-md-0 p-md-4">
-      <img src="./assets/img/location-placeholder.jpg" class="w-100" alt="placeholder">
-    </div>
-    <div class="col-md-6 p-4 ps-md-0">
-      <h5 class="mt-0">Unique id {{ fuelStation.id }}</h5>
-      <p>Prices {{ fuelStation.price }}</p>
-      <a href="#" class="stretched-link">Make route</a>
-    </div>
+  <div class="list-group">
+    <a
+      (click)="showFuelStationDetails(fuelStation)"
+      *ngFor="let fuelStation of results"
+      class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+      href="#"
+    >
+      Price for this station: &euro;{{ fuelStation.price / 1000 }},-
+      <span class="badge bg-secondary rounded-pill">Unique id: {{ fuelStation.id }}</span>
+    </a>
   </div>
 </div>
