@@ -95,7 +95,7 @@ export class MapService {
     if (this._allPlacedFuelStations) this._map.removeLayer(this._allPlacedFuelStations);
   }
 
-  public appendAllFuelStationSummaries(fuelStations: FuelStationSummary[], amount: number) {
+  public appendAllFuelStationSummaries(fuelStations: FuelStationSummary[], amount: number): void {
     if (this._allPlacedFuelStations) this._map.removeLayer(this._allPlacedFuelStations);
     this._allPlacedFuelStations = layerGroup();
     this.fuelStations = fuelStations.sort((a, b) => a.price - b.price);
@@ -159,6 +159,13 @@ export class MapService {
 
   clearMapLayers() {
     this._allMapLayers.clearLayers();
+    if(this.bufferLayer) this._map.removeLayer(this.bufferLayer);
+    if(this.turfLineLayer) this._map.removeLayer(this.turfLineLayer);
+    if(this.PDOKLayer) this._map.removeLayer(this.PDOKLayer);
+    if(this._allPlacedFuelStations) this._map.removeLayer(this._allPlacedFuelStations);
+    this._map.closePopup();
+
+    this.centerBackToDefaultLocation();
   }
 
   centerBackToDefaultLocation() {
