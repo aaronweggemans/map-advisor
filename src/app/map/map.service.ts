@@ -8,7 +8,7 @@ import {
   layerGroup,
   Map,
   marker,
-  Marker, Polyline,
+  Polyline,
   polyline,
   popup,
   tileLayer,
@@ -21,7 +21,7 @@ import {
   DEFAULT_ZOOM,
   DFEAULT_TILE_LAYER_THEME,
 } from '../app.contants';
-import {ROUTE_LOCATION, TileTheme} from './map.component.models';
+import {TileTheme} from './map.component.models';
 import {BehaviorSubject, Observable, Subject, takeUntil} from 'rxjs';
 import {buffer, lineString} from '@turf/turf';
 import {Feature, LineString, Position} from 'geojson';
@@ -32,7 +32,6 @@ import {Coordinates} from "../dashboard/calculate-route/calculate-route.models";
 })
 export class MapService {
   private _map!: Map;
-  private routeMarkers: Partial<Record<ROUTE_LOCATION, Marker>> = {};
 
   private _allMapLayers = layerGroup();
   private _theme = layerGroup();
@@ -118,15 +117,10 @@ export class MapService {
     this._map.flyTo([coordinates.lat, coordinates.lon], 13, {animate: true});
   }
 
-  appendMarker(lat: number, lng: number, layer: ROUTE_LOCATION) {
+  appendMarker(lat: number, lng: number, layer: LayerGroup) {
+    layer.clearLayers()
     if (this.turfLineLayer) this._map.removeLayer(this.turfLineLayer);
     if (this.bufferLayer) this._map.removeLayer(this.bufferLayer);
-
-    const existingMarker = this.routeMarkers[layer];
-    if (existingMarker) {
-      this._map.removeLayer(existingMarker);
-      delete this.routeMarkers[layer];
-    }
 
     // Maak nieuwe marker aan
     const customMarker = icon({
@@ -136,10 +130,8 @@ export class MapService {
     });
 
     const newMarker = marker([lat, lng], { icon: customMarker });
-    newMarker.addTo(this.PDOKLayer);
-    this.PDOKLayer.addTo(this._map);
-
-    this.routeMarkers[layer] = newMarker;
+    newMarker.addTo(layer);
+    layer.addTo(this._map);
   }
 
   public drawPolyLine(route: number[][]) {

@@ -22,7 +22,7 @@ import {
   withLatestFrom
 } from "rxjs";
 import {NotifierService} from "angular-notifier";
-import {CalculateRouteService} from "./calculate-route.service";
+import {ORSRouteService} from "./ors-route.service";
 import {DEFAULT_LOADING_SETTINGS} from "../../app.contants";
 
 @Component({
@@ -46,7 +46,7 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
 
   private readonly _drawPolyline$ = new Subject<[Coordinates, Coordinates]>();
   protected readonly ORSProperties$: Observable<ORSProperties> = this._drawPolyline$.asObservable().pipe(
-    switchMap((coordinates) => this.calculateRouteService.getRoute(coordinates[0], coordinates[1]).pipe(
+    switchMap((coordinates) => this.orsRouteService.getRoute(coordinates[0], coordinates[1]).pipe(
       catchError(this.handleError.bind(this)),
       tap((data) => this.mapService.drawPolyLine(data.geometry.coordinates)),
       map((data: ORSRoutePlan) => data.properties))
@@ -64,7 +64,7 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
     private readonly resolver: ViewContainerRef,
     private readonly dashboardService: DashboardService,
     private readonly notifierService: NotifierService,
-    private readonly calculateRouteService: CalculateRouteService
+    private readonly orsRouteService: ORSRouteService
   ) {
   }
 
@@ -87,8 +87,6 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
     this.onDestroy$.complete();
     this.onDestroy$.unsubscribe();
     this.mapService.clearMapLayers();
-
-    console.log('Nu ga ik de map clearen enzo')
   }
 
   protected fuelStationIsSelected(fuelStation: FuelStationSummary) {

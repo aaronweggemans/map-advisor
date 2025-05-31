@@ -1,10 +1,10 @@
 import {createHttpFactory, SpectatorHttp} from "@ngneat/spectator";
-import {CalculateRouteService} from "./calculate-route.service";
+import {ORSRouteService} from "./ors-route.service";
 
 describe('CalculateRouteService', () => {
-  let spectator: SpectatorHttp<CalculateRouteService>;
+  let spectator: SpectatorHttp<ORSRouteService>;
   const createHttp = createHttpFactory({
-    service: CalculateRouteService,
+    service: ORSRouteService,
   });
 
   beforeEach(() => {

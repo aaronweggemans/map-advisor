@@ -6,8 +6,7 @@
 <p class="text-center">Please select a fuelstation on the map to get information.</p>
 
 <div class="my-4">
-  <app-calculate-form (validFormSubmit)="onFormSubmit($event)" (twoLocationsSet)="setRouteAndCenterMiddle($event)">
-  </app-calculate-form>
+  <app-calculate-form (validFormSubmit)="onFormSubmit($event)" (twoLocationsSet)="setRouteAndCenterMiddle($event)"></app-calculate-form>
 
   <ngx-loading class="mb-3" [config]="DEFAULT_LOADING_SETTINGS" [show]="(isLoading$ | async) || false"></ngx-loading>
 

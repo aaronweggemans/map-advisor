@@ -7,14 +7,14 @@ import {
   tap
 } from "rxjs";
 import {Coordinates, RouteForm} from "../calculate-route.models";
-import {ROUTE_LOCATION} from "../../../map/map.component.models";
 import {AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {CalculateRouteService} from "../calculate-route.service";
 import {MapService} from "../../../map/map.service";
-import { DEFAULT_LOADING_SETTINGS } from '../../../app.contants';
+import {ALL_SUPPORTED_FUEL_TYPES} from '../../../app.contants';
 import {PdokSuggestionInputComponent} from "../pdok-suggestion-input/pdok-suggestion-input.component";
 import {NgxLoadingModule} from "ngx-loading";
 import {AsyncPipe, NgForOf} from "@angular/common";
+import {PdokSuggestionService} from "../pdok-suggestion.service";
+import {LayerGroup, layerGroup} from "leaflet";
 
 @Component({
   selector: 'app-calculate-form',
@@ -32,8 +32,10 @@ export class CalculateFormComponent implements OnInit {
   @Output() validFormSubmit: EventEmitter<RouteForm> = new EventEmitter();
   @Output() twoLocationsSet: EventEmitter<[Coordinates, Coordinates]> = new EventEmitter();
 
-  protected readonly DEFAULT_LOADING_SETTINGS = DEFAULT_LOADING_SETTINGS;
-  protected readonly fuelTypes = ["autogas", "cng", "diesel", "diesel_special", "euro98", "euro95"];
+  private readonly PDOK_MARKER_LAYER_A = layerGroup();
+  private readonly PDOK_MARKER_LAYER_B = layerGroup();
+
+  protected readonly fuelTypes = ALL_SUPPORTED_FUEL_TYPES
 
   private readonly locationA$: Subject<Coordinates> = new Subject();
   private readonly locationB$: Subject<Coordinates> = new Subject();
@@ -50,19 +52,16 @@ export class CalculateFormComponent implements OnInit {
   });
 
   constructor(
-    private readonly calculateRouteService: CalculateRouteService,
+    private readonly pdokSuggestionService: PdokSuggestionService,
     private readonly mapService: MapService,
   ) {}
 
   ngOnInit() {
-    this.requestPDOKCoordinatesAndConfigureMap(this.start.valueChanges, ROUTE_LOCATION.LOCATION_A).pipe(
-      tap((coords) => this.locationA$.next(coords)),
-      tap((coords) => this.mapService.flyTo(coords))
-    ).subscribe();
+    this.requestPDOKCoordinatesAndConfigureMap(this.start.valueChanges, this.PDOK_MARKER_LAYER_A)
+      .subscribe((coords) => (this.locationA$.next(coords), this.mapService.flyTo(coords)));
 
-    this.requestPDOKCoordinatesAndConfigureMap(this.end.valueChanges, ROUTE_LOCATION.LOCATION_B).pipe(
-      tap((coords) => this.locationB$.next(coords))
-    ).subscribe();
+    this.requestPDOKCoordinatesAndConfigureMap(this.end.valueChanges, this.PDOK_MARKER_LAYER_B)
+      .subscribe((coords) => this.locationB$.next(coords));
 
     combineLatest([this.locationA$, this.locationB$]).subscribe((data) => {
       this.twoLocationsSet.emit(data);
@@ -100,12 +99,12 @@ export class CalculateFormComponent implements OnInit {
     }
   }
 
-  private requestPDOKCoordinatesAndConfigureMap(of$: Observable<string>, firstOrSecond: ROUTE_LOCATION): Observable<Coordinates> {
+  private requestPDOKCoordinatesAndConfigureMap(of$: Observable<string>, layer: LayerGroup): Observable<Coordinates> {
     return of$.pipe(
-      switchMap((id: string) => this.calculateRouteService.getLocation(id)),
+      switchMap((id: string) => this.pdokSuggestionService.getLocation(id)),
       tap((coordinates) => {
         this._submitted$.next(false)
-        this.mapService.appendMarker(coordinates.lat, coordinates.lon, firstOrSecond);
+        this.mapService.appendMarker(coordinates.lat, coordinates.lon, layer);
         this.mapService.clearDots();
         this.radius.patchValue(0, { emitEvent: false })
       }),
