@@ -13,3 +13,5 @@ export const DEFAULT_LOADING_SETTINGS = {
   secondaryColour: 'rgb(255, 159, 64)',
   tertiaryColour: 'rgb(255, 205, 86)',
 }
+
+export const ALL_SUPPORTED_FUEL_TYPES = ["autogas", "cng", "diesel", "diesel_special", "euro98", "euro95"];

@@ -1,28 +1,20 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {
-  catchError,
   combineLatest,
-  debounceTime,
-  distinctUntilChanged,
-  EMPTY,
-  map,
   Observable,
   Subject,
   switchMap,
   tap
 } from "rxjs";
-import {Coordinates, ORSProperties, ORSRoutePlan} from "../calculate-route.models";
-import {ROUTE_LOCATION} from "../../../map/map.component.models";
+import {Coordinates, RouteForm} from "../calculate-route.models";
 import {AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {CalculateRouteService} from "../calculate-route.service";
 import {MapService} from "../../../map/map.service";
-import {NotifierService} from "angular-notifier";
-import { DEFAULT_LOADING_SETTINGS } from '../../../app.contants';
+import {ALL_SUPPORTED_FUEL_TYPES} from '../../../app.contants';
 import {PdokSuggestionInputComponent} from "../pdok-suggestion-input/pdok-suggestion-input.component";
 import {NgxLoadingModule} from "ngx-loading";
-import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
-import {FuelStationSummary} from "../../cheap-fuel-stations/cheap-fuel-stations.models";
-import {DashboardService} from "../../dashboard.service";
+import {AsyncPipe, NgForOf} from "@angular/common";
+import {PdokSuggestionService} from "../pdok-suggestion.service";
+import {LayerGroup, layerGroup} from "leaflet";
 
 @Component({
   selector: 'app-calculate-form',
@@ -32,25 +24,21 @@ import {DashboardService} from "../../dashboard.service";
     PdokSuggestionInputComponent,
     NgxLoadingModule,
     NgForOf,
-    NgIf,
     AsyncPipe
   ],
   templateUrl: './calculate-form.component.html',
 })
 export class CalculateFormComponent implements OnInit {
-  private fuelStations: FuelStationSummary[] = [];
+  @Output() validFormSubmit: EventEmitter<RouteForm> = new EventEmitter();
+  @Output() twoLocationsSet: EventEmitter<[Coordinates, Coordinates]> = new EventEmitter();
 
-  @Output() getORSProperties: EventEmitter<ORSProperties> = new EventEmitter<ORSProperties>();
-  @Output() getFuelStations: EventEmitter<FuelStationSummary[]> = new EventEmitter<FuelStationSummary[]>();
+  private readonly PDOK_MARKER_LAYER_A = layerGroup();
+  private readonly PDOK_MARKER_LAYER_B = layerGroup();
 
-  protected readonly DEFAULT_LOADING_SETTINGS = DEFAULT_LOADING_SETTINGS;
-  protected readonly fuelTypes = ["autogas", "cng", "diesel", "diesel_special", "euro98", "euro95"];
+  protected readonly fuelTypes = ALL_SUPPORTED_FUEL_TYPES
 
   private readonly locationA$: Subject<Coordinates> = new Subject();
   private readonly locationB$: Subject<Coordinates> = new Subject();
-
-  private readonly _isLoading$: Subject<boolean> = new Subject();
-  protected readonly isLoading$: Observable<boolean> = this._isLoading$.asObservable();
 
   private readonly _submitted$: Subject<boolean> = new Subject();
   protected readonly submitted$: Observable<boolean> = this._submitted$.asObservable();
@@ -64,35 +52,23 @@ export class CalculateFormComponent implements OnInit {
   });
 
   constructor(
-    private readonly calculateRouteService: CalculateRouteService,
+    private readonly pdokSuggestionService: PdokSuggestionService,
     private readonly mapService: MapService,
-    private readonly dashboardService: DashboardService,
-    private readonly notifierService: NotifierService
   ) {}
 
   ngOnInit() {
-    this.requestPDOKCoordinatesAndConfigureMap(this.start.valueChanges, ROUTE_LOCATION.LOCATION_A).pipe(
-      tap((coords) => this.locationA$.next(coords)),
-      tap((coords) => this.mapService.flyTo(coords))
-    ).subscribe();
+    this.requestPDOKCoordinatesAndConfigureMap(this.start.valueChanges, this.PDOK_MARKER_LAYER_A)
+      .subscribe((coords) => (this.locationA$.next(coords), this.mapService.flyTo(coords)));
 
-    this.requestPDOKCoordinatesAndConfigureMap(this.end.valueChanges, ROUTE_LOCATION.LOCATION_B).pipe(
-      tap((coords) => this.locationB$.next(coords))
-    ).subscribe();
+    this.requestPDOKCoordinatesAndConfigureMap(this.end.valueChanges, this.PDOK_MARKER_LAYER_B)
+      .subscribe((coords) => this.locationB$.next(coords));
 
-    this.radius.valueChanges.pipe(
-      distinctUntilChanged(),
-      tap((radius) => this.mapService.appendBufferToPolyLine(radius))
-    ).subscribe();
-
-    this.amount.valueChanges.pipe(
-      distinctUntilChanged(),
-      debounceTime(50),
-      tap((amount) => this.mapService.appendOrRemoveFuelStation(amount)),
-      tap((amount) => this.getFuelStations.emit(this.fuelStations.slice(0, amount)))
-    ).subscribe();
-
-    combineLatest([this.locationA$, this.locationB$]).pipe(this.setRouteAndCenterMiddle.bind(this)).subscribe();
+    combineLatest([this.locationA$, this.locationB$]).subscribe((data) => {
+      this.twoLocationsSet.emit(data);
+      this.radius.enable({ emitEvent: false });
+      this.amount.enable();
+      this.fuelType.enable();
+    });
   }
 
   get start(): AbstractControl<string> {
@@ -116,61 +92,24 @@ export class CalculateFormComponent implements OnInit {
   }
 
   protected onFormSubmit() {
-    this._isLoading$.next(true);
+    this._submitted$.next(true);
 
-    if(this.form.valid && this.mapService.bufferLayer) {
-      const bufferLayer = this.mapService.bufferLayer.toGeoJSON();
-
-      if (bufferLayer.type === "FeatureCollection" && bufferLayer.features[0].geometry.type === "Polygon") {
-        const coordinates = bufferLayer.features[0].geometry.coordinates;
-        this.dashboardService.getAllFuelStationsOnCoordinates(coordinates, this.fuelType.value).pipe(
-          catchError(this.handleError.bind(this)),
-          tap((fuelStations) => {
-            this.fuelStations = fuelStations;
-            this.getFuelStations.emit(fuelStations.slice(0, this.amount.value));
-            this.mapService.appendAllFuelStationSummaries(fuelStations, this.amount.value)
-            this._isLoading$.next(false)
-            this._submitted$.next(true)
-          }),
-        ).subscribe();
-      }
+    if(this.form.valid) {
+      this.validFormSubmit.emit(this.form.getRawValue())
     }
   }
 
-  private setRouteAndCenterMiddle(of$: Observable<[Coordinates, Coordinates]>): Observable<ORSRoutePlan> {
+  private requestPDOKCoordinatesAndConfigureMap(of$: Observable<string>, layer: LayerGroup): Observable<Coordinates> {
     return of$.pipe(
-      map(([a, b]) => ({ a, b })),
-      switchMap(({ a, b }) => this.calculateRouteService.getRoute(a, b).pipe(
-        catchError(this.handleError.bind(this)))
-      ),
-      tap((data: ORSRoutePlan) => {
-        this.mapService.drawPolyLine(data.geometry.coordinates);
-        this.getORSProperties.emit(data.properties);
-        this.radius.enable();
-        this.amount.enable();
-        this.fuelType.enable();
-      })
-    )
-  }
-
-  private requestPDOKCoordinatesAndConfigureMap(of$: Observable<string>, firstOrSecond: ROUTE_LOCATION): Observable<Coordinates> {
-    return of$.pipe(
-      switchMap((id: string) => this.calculateRouteService.getLocation(id)),
+      switchMap((id: string) => this.pdokSuggestionService.getLocation(id)),
       tap((coordinates) => {
         this._submitted$.next(false)
-        this.mapService.appendMarker(coordinates.lat, coordinates.lon, firstOrSecond);
+        this.mapService.appendMarker(coordinates.lat, coordinates.lon, layer);
         this.mapService.clearDots();
         this.radius.patchValue(0, { emitEvent: false })
       }),
     )
   }
-
-  private handleError() {
-    this.notifierService.show({ type: 'error',  message: `Something went wrong!`});
-    this._isLoading$.next(false)
-    return EMPTY;
-  }
 }
 
 type RouteFormGroup = { [K in keyof RouteForm]: AbstractControl<RouteForm[K]> }
-type RouteForm = { start: string; end: string; radius: number, fuelType: string, amount: number }

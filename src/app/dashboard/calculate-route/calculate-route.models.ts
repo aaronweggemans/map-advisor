@@ -89,3 +89,4 @@ export type ORSGeometry = {
 
 export type Coordinates = { lat: number, lon: number }
 
+export type RouteForm = { start: string; end: string; radius: number, fuelType: string, amount: number }

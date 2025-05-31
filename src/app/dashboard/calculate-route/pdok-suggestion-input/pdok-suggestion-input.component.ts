@@ -18,7 +18,7 @@ import {
   tap
 } from "rxjs";
 import {PDOKAddressMatch} from "../calculate-route.models";
-import {CalculateRouteService} from "../calculate-route.service";
+import {PdokSuggestionService} from "../pdok-suggestion.service";
 
 @Component({
   selector: 'app-pdok-suggestion-input',
@@ -52,9 +52,8 @@ export class PdokSuggestionInputComponent implements ControlValueAccessor {
     this.suggestionInput.valueChanges.pipe((of) => this.mapAndFilterOnPostalCode(of));
 
   private onChange!: (value: string) => void;
-  private onTouched!: () => void;
 
-  constructor(private readonly calculateRouteService: CalculateRouteService) {
+  constructor(private readonly pdokSuggestionService: PdokSuggestionService) {
   }
 
   protected selectSuggestion(suggestion: PDOKAddressMatch): void {
@@ -70,7 +69,7 @@ export class PdokSuggestionInputComponent implements ControlValueAccessor {
       filter((value) => value.length > 0),
       distinctUntilChanged(),
       switchMap((address) =>
-        this.calculateRouteService.getSuggestionsOnAddress(address).pipe(
+        this.pdokSuggestionService.getSuggestionsOnAddress(address).pipe(
           catchError(() => {
             this.suggestionInput.disable();
             this._showSuggestions$.next(false);
@@ -87,9 +86,7 @@ export class PdokSuggestionInputComponent implements ControlValueAccessor {
     this.onChange = onChange;
   }
 
-  registerOnTouched(onTouched: () => void): void {
-    this.onTouched = onTouched;
-  }
+  registerOnTouched(): void {}
 
   setDisabledState(isDisabled: boolean): void {
     if (isDisabled) {
