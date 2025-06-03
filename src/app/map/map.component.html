@@ -1,5 +1,5 @@
 <div class="">
-  <app-layer-switcher *ngIf="isTablet$ | async" (setTheme)="setTheme($event)"></app-layer-switcher>
+  <app-map-top-navbar class="position-fixed z-1"></app-map-top-navbar>
 
   <div id="map" class="w-100 h-100 position-fixed" [class]="theme === 'LIGHT' ? 'white-bg-color' : 'black-bg-color'"></div>
 
@@ -8,4 +8,6 @@
   <app-map-sidebar [theme]="theme">
     <ng-content select="[location=sidebar]"></ng-content>
   </app-map-sidebar>
+
+  <app-layer-switcher *ngIf="isTablet$ | async" (setTheme)="setTheme($event)"></app-layer-switcher>
 </div>

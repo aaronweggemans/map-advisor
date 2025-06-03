@@ -1,19 +1,15 @@
 import {Injectable} from '@angular/core';
 import {
   circle,
-  GeoJSON,
-  geoJSON,
   icon,
-  LatLngExpression, LayerGroup,
+  LatLngBounds,
+  Layer, LayerGroup,
   layerGroup,
   Map,
   marker,
-  Polyline,
-  polyline,
   popup,
   tileLayer,
 } from 'leaflet';
-import {FuelStationSummary} from '../dashboard/cheap-fuel-stations/cheap-fuel-stations.models';
 import {
   DARK_TILE_LAYER_THEME,
   DEFAULT_LATITUDE,
@@ -22,9 +18,6 @@ import {
   DFEAULT_TILE_LAYER_THEME,
 } from '../app.contants';
 import {TileTheme} from './map.component.models';
-import {BehaviorSubject, Observable, Subject, takeUntil} from 'rxjs';
-import {buffer, lineString} from '@turf/turf';
-import {Feature, LineString, Position} from 'geojson';
 import {Coordinates} from "../dashboard/calculate-route/calculate-route.models";
 
 @Injectable({
@@ -33,32 +26,14 @@ import {Coordinates} from "../dashboard/calculate-route/calculate-route.models";
 export class MapService {
   private _map!: Map;
 
-  private _allMapLayers = layerGroup();
   private _theme = layerGroup();
-  private PDOKLayer = layerGroup();
-  private turfLineLayer: Polyline | null = null;
-
-  private _allPlacedFuelStations: LayerGroup = layerGroup();
-
-  public bufferLayer: GeoJSON | null = null;
-  private turfLine: Feature<LineString> | null = null;
-
-  private readonly _onDestroy$ = new Subject<void>();
-
-  private readonly _foundGasStationId$: Subject<number> = new Subject<number>();
-  public readonly foundGasStationId$: Observable<number> = this._foundGasStationId$.asObservable().pipe(takeUntil(this._onDestroy$));
-
-  private readonly _theme$: BehaviorSubject<TileTheme> = new BehaviorSubject<TileTheme>('LIGHT');
-  public readonly theme$: Observable<TileTheme> = this._theme$.asObservable();
-
-  private fuelStations: FuelStationSummary[] = [];
 
   public setMap(map: Map): void {
     this._map = map;
     this.switchTheme('LIGHT');
   }
 
-  public switchTheme(theme: TileTheme) {
+  public switchTheme(theme: TileTheme): void {
     this._theme.clearLayers();
 
     const lightTheme = tileLayer(DFEAULT_TILE_LAYER_THEME);
@@ -70,57 +45,28 @@ export class MapService {
       this._theme.addLayer(darkTheme);
     }
 
-    this._theme$.next('LIGHT');
     this._map.addLayer(this._theme);
   }
 
-  appendFuelStationToLayer(fuelStation: FuelStationSummary) {
-    const appendCirclesToMapLayer = circle(
-      {lat: fuelStation.lat, lng: fuelStation.lon},
-      {radius: 20, color: this.setFadeColorOnNumber(fuelStation.price_indication!)}
-    );
-
-    appendCirclesToMapLayer.addTo(this._allPlacedFuelStations)
+  public appendCircleOnColorIndication(lat: number, lng: number, color: string, layer: LayerGroup): void {
+    const circleMarker = circle({lat, lng}, {radius: 20, color});
+    circleMarker.addTo(layer);
+    layer.addTo(this._map);
   }
 
-  openPopup(coordinates: Coordinates, content: string | HTMLElement) {
+  public openPopup(coordinates: Coordinates, content: string | HTMLElement): void {
     popup()
       .setLatLng({ lat: coordinates.lat, lng: coordinates.lon })
       .setContent(content)
       .openOn(this._map);
   }
 
-  public clearDots() {
-    if (this._allPlacedFuelStations) this._map.removeLayer(this._allPlacedFuelStations);
+  public flyTo(coordinates: Coordinates, zoom = 13): void {
+    this._map.flyTo([coordinates.lat, coordinates.lon], zoom, {animate: true});
   }
 
-  public appendAllFuelStationSummaries(fuelStations: FuelStationSummary[], amount: number): void {
-    if (this._allPlacedFuelStations) this._map.removeLayer(this._allPlacedFuelStations);
-    this._allPlacedFuelStations = layerGroup();
-    this.fuelStations = fuelStations.sort((a, b) => a.price - b.price);
-    const amountOfFuelStations = fuelStations.slice(0, amount)
-    const fuelStationSummaries = this._calculatePriceIndication(amountOfFuelStations);
-    fuelStationSummaries.forEach((fuelStation) => this.appendFuelStationToLayer(fuelStation));
-    this._allPlacedFuelStations.addTo(this._map);
-  }
-
-  public appendOrRemoveFuelStation(amount: number): void {
-    if (this._allPlacedFuelStations) this._map.removeLayer(this._allPlacedFuelStations);
-    this._allPlacedFuelStations = layerGroup();
-    const amountOfFuelStations = this.fuelStations.slice(0, amount)
-    const fuelStationSummaries = this._calculatePriceIndication(amountOfFuelStations);
-    fuelStationSummaries.forEach((fuelStation) => this.appendFuelStationToLayer(fuelStation));
-    this._allPlacedFuelStations.addTo(this._map);
-  }
-
-  flyTo(coordinates: Coordinates): void {
-    this._map.flyTo([coordinates.lat, coordinates.lon], 13, {animate: true});
-  }
-
-  appendMarker(lat: number, lng: number, layer: LayerGroup) {
+  public appendMarker(lat: number, lng: number, layer: LayerGroup): void {
     layer.clearLayers()
-    if (this.turfLineLayer) this._map.removeLayer(this.turfLineLayer);
-    if (this.bufferLayer) this._map.removeLayer(this.bufferLayer);
 
     // Maak nieuwe marker aan
     const customMarker = icon({
@@ -134,33 +80,24 @@ export class MapService {
     layer.addTo(this._map);
   }
 
-  public drawPolyLine(route: number[][]) {
-    const latLngCasting = route.map((latlng) => [latlng[1], latlng[0]]);
-    this.turfLineLayer = polyline(latLngCasting as LatLngExpression[], { color: '#4787B4',  weight: 5, opacity: 0.8 });
-    this.turfLineLayer.addTo(this._map);
-    this._map.fitBounds(this.turfLineLayer.getBounds());
-    this.turfLine = lineString(route as Position[]);
+  public removeLayerFromMap(layer: LayerGroup): void {
+    this._map.removeLayer(layer);
   }
 
-  public appendBufferToPolyLine(radius: number): void {
-    const bufferRadius = buffer(this.turfLine!, radius / 1000, {units: 'kilometers'});
-    if (this.bufferLayer) this._map.removeLayer(this.bufferLayer);
-    this.bufferLayer = geoJSON(bufferRadius, {style: {color: '#5C636B', weight: 5, fillOpacity: 0.3}}).addTo(this._map);
-  }
-
-
-  clearMapLayers() {
-    this._allMapLayers.clearLayers();
-    if(this.bufferLayer) this._map.removeLayer(this.bufferLayer);
-    if(this.turfLineLayer) this._map.removeLayer(this.turfLineLayer);
-    if(this.PDOKLayer) this._map.removeLayer(this.PDOKLayer);
-    if(this._allPlacedFuelStations) this._map.removeLayer(this._allPlacedFuelStations);
+  public clearMapLayers(): void {
     this._map.closePopup();
-
     this.centerBackToDefaultLocation();
   }
 
-  centerBackToDefaultLocation() {
+  public addLayerToMap(layer: Layer): void {
+    layer.addTo(this._map);
+  }
+
+  public flyWithZoom(latlng: LatLngBounds) {
+    this._map.fitBounds(latlng);
+  }
+
+  public centerBackToDefaultLocation(): void {
     this._map.flyTo(
       {lat: DEFAULT_LATITUDE, lng: DEFAULT_LONGITUDE},
       DEFAULT_ZOOM,
@@ -168,25 +105,5 @@ export class MapService {
         animate: false,
       }
     );
-  }
-
-  cleanupObservables() {
-    this._onDestroy$.next();
-  }
-
-  private setFadeColorOnNumber(percentage: number) {
-    const value = percentage / 100;
-    const hue = ((1 - value) * 120).toString(10);
-    return ['hsl(', hue, ',100%,50%)'].join('');
-  }
-
-  private _calculatePriceIndication(fuelStations: FuelStationSummary[]): FuelStationSummary[] {
-    const highestCosts = Math.max(...fuelStations.map((station) => station.price));
-    const lowestCosts = Math.min(...fuelStations.map((station) => station.price));
-
-    return fuelStations.map((station: FuelStationSummary) => ({
-      ...station,
-      price_indication: Math.floor(((station.price - lowestCosts) / (highestCosts - lowestCosts)) * 100),
-    })).sort((a, b) => a.price_indication - b.price_indication);
   }
 }

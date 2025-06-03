@@ -16,8 +16,8 @@ export class MapMenuComponent {
   @Input() theme: TileTheme = 'LIGHT';
 
   protected readonly SIDE_BAR_FUEL_PRICES: SidebarItem[] = [
-    { url: "/cheap-fuel-stations/lpg", title: "Find on coordinates" },
-    { url: "/calculate-route-for-cheap-fuel-stations", title: "Find fuel station on route" },
+    { url: "/vind-tankstation-in-gemeente", title: "Zoeken op gemeente" },
+    { url: "/vind-tankstation-op-route", title: "Zoeken op route" },
   ];
 
   protected openedSidebar: SidebarDetails = { fuelPrices: false};

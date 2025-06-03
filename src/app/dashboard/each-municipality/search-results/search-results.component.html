@@ -1,0 +1,15 @@
+<div *ngIf="results.length > 0">
+  <hr />
+
+  <div class="list-group">
+    <a
+      (click)="showFuelStationDetails(fuelStation)"
+      *ngFor="let fuelStation of results"
+      class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+      href="#"
+    >
+      Price for this station: &euro;{{ fuelStation.price / 1000 }},-
+      <span class="badge bg-primary rounded-pill">Unique id: {{ fuelStation.id }}</span>
+    </a>
+  </div>
+</div>

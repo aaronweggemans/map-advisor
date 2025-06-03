@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {
   combineLatest,
   Observable,
@@ -28,7 +28,7 @@ import {LayerGroup, layerGroup} from "leaflet";
   ],
   templateUrl: './calculate-form.component.html',
 })
-export class CalculateFormComponent implements OnInit {
+export class CalculateFormComponent implements OnInit, OnDestroy {
   @Output() validFormSubmit: EventEmitter<RouteForm> = new EventEmitter();
   @Output() twoLocationsSet: EventEmitter<[Coordinates, Coordinates]> = new EventEmitter();
 
@@ -71,6 +71,11 @@ export class CalculateFormComponent implements OnInit {
     });
   }
 
+  ngOnDestroy() {
+    this.mapService.removeLayerFromMap(this.PDOK_MARKER_LAYER_A);
+    this.mapService.removeLayerFromMap(this.PDOK_MARKER_LAYER_B);
+  }
+
   get start(): AbstractControl<string> {
     return this.form.get('start')!;
   }
@@ -105,7 +110,6 @@ export class CalculateFormComponent implements OnInit {
       tap((coordinates) => {
         this._submitted$.next(false)
         this.mapService.appendMarker(coordinates.lat, coordinates.lon, layer);
-        this.mapService.clearDots();
         this.radius.patchValue(0, { emitEvent: false })
       }),
     )

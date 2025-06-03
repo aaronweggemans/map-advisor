@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {FuelStationSummary} from "../../cheap-fuel-stations/cheap-fuel-stations.models";
 import {NgForOf, NgIf} from "@angular/common";
+import {FuelStationSummary} from "../../dashboard.models";
 
 @Component({
   selector: 'app-search-results',

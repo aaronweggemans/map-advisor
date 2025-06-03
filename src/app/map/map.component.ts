@@ -13,11 +13,12 @@ import { TileTheme } from './map.component.models';
 import {BreakpointObserver} from "@angular/cdk/layout";
 import {Observable, map as rxjsMap } from "rxjs";
 import {AsyncPipe, NgIf} from "@angular/common";
+import {MapTopNavbarComponent} from "./map-top-navbar/map-top-navbar.component";
 
 @Component({
   selector: 'app-map',
   standalone: true,
-  imports: [MapMenuComponent, MapSidebarComponent, LayerSwitcherComponent, NgIf, AsyncPipe],
+  imports: [MapMenuComponent, MapSidebarComponent, LayerSwitcherComponent, NgIf, AsyncPipe, MapTopNavbarComponent],
   templateUrl: './map.component.html',
 })
 export class MapComponent implements OnInit {

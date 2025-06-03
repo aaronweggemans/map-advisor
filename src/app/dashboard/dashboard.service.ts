@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import {map, Observable} from "rxjs";
-import {FuelStation, FuelStationSummary} from "./cheap-fuel-stations/cheap-fuel-stations.models";
 import {HttpClient} from "@angular/common/http";
 import { environment } from '../../environments/environment';
 import {Position} from "geojson";
+import {FuelStation, FuelStationSummary, Municipality, MunicipalityProperty} from './dashboard.models';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +22,57 @@ export class DashboardService {
     return this.httpClient.post<FuelStationSummaryDTO[]>(`${environment.url}api/v1/fuel-stations/${fueltype}/coordinates`, body)
       .pipe(map(this._toFuelStationSummary));
   }
+
+  public getDutchMunicipalities(): Observable<Municipality[]> {
+    return this.httpClient.get<MunicipalityRootDto>('./assets/municipalities/dutch-municipalities.json')
+      .pipe(map(this.toMunicipalities));
+  }
+
+  private toMunicipalities = (res: MunicipalityRootDto): Municipality[] =>
+    res.features.map(this.toFeature)
+
+  private toFeature = (res: MunicipalityFeatureDto): Municipality => ({
+    ...res,
+    geometry: {
+      ...res.geometry,
+      coordinates: (() => {
+        if(this.isPolygon(res.geometry)) {
+          return res.geometry.coordinates
+            .flatMap((coordinate) => coordinate.map(this.castToLatitudeLongitude));
+        }
+
+        if(this.isMultiPolygon(res.geometry)) {
+          return res.geometry.coordinates
+            .flatMap((coordinate) => coordinate.map((coords) =>
+              coords.map(this.castToLatitudeLongitude)));
+        }
+
+        // Never reached
+        return []
+      })()
+    },
+    properties: this.toProperties(res.properties),
+  })
+
+  private toProperties = (res: MunicipalityPropertyDto): MunicipalityProperty => ({
+    name: res.Gemeentenaam,
+    code: res.Gemeentecode,
+    numberOfInhabitants: res.aant_inw,
+    area: res.Shape__Area,
+    covidInfections: res.Aantal_Besmettingen,
+    province: res.Provincie,
+    region: res.Veiligheidsregio,
+  })
+
+  private castToLatitudeLongitude(latLong: number[]): number[] {
+    return [latLong[1], latLong[0]]
+  }
+
+  private readonly isPolygon = (geometry: MunicipalityGeometryDto): geometry is { type: 'Polygon'; coordinates: number[][][] } =>
+    geometry.type === 'Polygon';
+
+  private readonly isMultiPolygon = (geometry: MunicipalityGeometryDto): geometry is { type: 'MultiPolygon'; coordinates: number[][][][] } =>
+    geometry.type === 'MultiPolygon';
 
   private _toFuelStationSummary = (
     fuelStation: FuelStationSummaryDTO[]
@@ -102,3 +153,42 @@ type CoordinatesBody = {
   }[]
 }
 
+type MunicipalityRootDto = {
+  features: MunicipalityFeatureDto[];
+  links: MunicipalityLinkDto
+  timeStamp: string
+  type: string
+}
+
+type MunicipalityLinkDto = {
+  href: string
+  rel: string
+  title: string
+  type: string
+}
+
+type MunicipalityFeatureDto = {
+  type: 'Polygon' | 'MultiPolygon'
+  geometry: MunicipalityGeometryDto
+  properties: MunicipalityPropertyDto
+  id: number
+}
+
+type MunicipalityGeometryDto = {
+  type: string
+  coordinates: number[][][] | number[][][][]
+}
+
+type MunicipalityPropertyDto = {
+  Gemeentenaam: string
+  Gemeentecode: string
+  gemeentencode: number
+  aant_inw: number
+  p_65_eo_jr: number
+  Shape__Area: number
+  Shape__Length: number
+  Aantal_Besmettingen: number
+  Provincie: string
+  Veiligheidsregio: string
+  GGD_regio: string
+}
