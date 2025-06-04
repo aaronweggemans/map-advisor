@@ -36,6 +36,7 @@ import {
 } from "leaflet";
 import {buffer, lineString} from "@turf/turf";
 import {Feature, LineString} from 'geojson';
+import {LoadingSpinnerComponent} from "../../shared/components/loading-spinner/loading-spinner.component";
 
 @Component({
   selector: 'app-calculate-route',
@@ -45,7 +46,8 @@ import {Feature, LineString} from 'geojson';
     NgxLoadingModule,
     CalculateFormComponent,
     SearchResultsComponent,
-    AsyncPipe
+    AsyncPipe,
+    LoadingSpinnerComponent
   ],
   templateUrl: './calculate-route.component.html'
 })
@@ -104,8 +106,8 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
           const filterFuelStations = fuelStations.slice(0, amount);
           this._filteredFuelStations$.next(filterFuelStations)
           this.allPlacedFuelStations.clearLayers();
-          filterFuelStations.forEach(({lat, lon, price_indication}) => {
-            this.mapService.appendCircleOnColorIndication(lat, lon, this.setFadeColorOnNumber(price_indication!), this.allPlacedFuelStations)
+          filterFuelStations.forEach(({lat, lon, fade}) => {
+            this.mapService.appendCircleOnColorIndication(lat, lon, fade, this.allPlacedFuelStations)
           })
         }),
       ).subscribe();
@@ -118,6 +120,7 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
     this.mapService.clearMapLayers();
     this.mapService.removeLayerFromMap(this.allPlacedFuelStations);
     if(this.bufferLayer) this.mapService.removeLayerFromMap(this.bufferLayer);
+    if(this.turfLineLayer) this.mapService.removeLayerFromMap(this.turfLineLayer);
   }
 
   protected fuelStationIsSelected(fuelStation: FuelStationSummary) {
@@ -140,8 +143,6 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
 
       this.dashboardService.getAllFuelStationsOnCoordinates(coordinates, formValues.fuelType).pipe(
         catchError(this.handleError.bind(this)),
-        map((fuelStations) => fuelStations.sort((a, b) => a.price - b.price)),
-        map(this.calculatePriceIndication),
         tap((fuelStations) => {
           this._isLoading$.next(false);
           this._allFuelStations$.next(fuelStations);
@@ -161,35 +162,20 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
 
   private handleError() {
     this.notifierService.show({ type: 'error',  message: `Something went wrong!`});
+    this._isLoading$.next(false);
     return EMPTY;
-  }
-
-  private calculatePriceIndication(fuelStations: FuelStationSummary[]): FuelStationSummary[] {
-    const highestCosts = Math.max(...fuelStations.map((station) => station.price));
-    const lowestCosts = Math.min(...fuelStations.map((station) => station.price));
-
-    return fuelStations.map((station: FuelStationSummary) => ({
-      ...station,
-      price_indication: Math.floor(((station.price - lowestCosts) / (highestCosts - lowestCosts)) * 100),
-    })).sort((a, b) => a.price_indication - b.price_indication);
-  }
-
-  private setFadeColorOnNumber(percentage: number) {
-    const value = percentage / 100;
-    const hue = ((1 - value) * 120).toString(10);
-    return ['hsl(', hue, ',100%,50%)'].join('');
   }
 
   private drawPolyLine(route: number[][]) {
     const latLngCasting = route.map((latlng) => [latlng[1], latlng[0]]);
-    this.turfLineLayer = polyline(latLngCasting as LatLngExpression[], { color: '#4787B4',  weight: 5, opacity: 0.8 });
+    this.turfLineLayer = polyline(latLngCasting as LatLngExpression[], { color: '#071C39',  weight: 5, opacity: 0.8 });
     this.mapService.addLayerToMap(this.turfLineLayer)
     this.turfLine = lineString(route);
   }
 
   private appendBufferToPolyLine(radius: number): void {
     const bufferRadius = buffer(this.turfLine!, radius / 1000, {units: 'kilometers'});
-    this.bufferLayer = geoJSON(bufferRadius, {style: {color: '#5C636B', weight: 5, fillOpacity: 0.3}})
+    this.bufferLayer = geoJSON(bufferRadius, {style: {color: '#BDC9CD', weight: 5, fillOpacity: 0.3}})
     this.mapService.addLayerToMap(this.bufferLayer)
   }
 }

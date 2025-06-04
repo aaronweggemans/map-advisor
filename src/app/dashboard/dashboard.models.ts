@@ -3,7 +3,8 @@ export type FuelStationSummary = {
   lat: number;
   lon: number;
   price: number;
-  price_indication?: number;
+  price_indication: number;
+  fade: string;
 }
 
 export type FuelStation = {

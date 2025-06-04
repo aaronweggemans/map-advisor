@@ -20,7 +20,11 @@ export class DashboardService {
   public getAllFuelStationsOnCoordinates(coordinates: Position[][], fueltype: string): Observable<FuelStationSummary[]> {
     const body = this.coordinatesToBody(coordinates);
     return this.httpClient.post<FuelStationSummaryDTO[]>(`${environment.url}api/v1/fuel-stations/${fueltype}/coordinates`, body)
-      .pipe(map(this._toFuelStationSummary));
+      .pipe(
+        map(this._toFuelStationSummary),
+        map(this.calculatePriceIndication),
+        map((stations) => stations.map(this.appendFaceColorOnNumber),
+      ));
   }
 
   public getDutchMunicipalities(): Observable<Municipality[]> {
@@ -82,7 +86,9 @@ export class DashboardService {
       lat: fuelStation.location_lat,
       lon: fuelStation.location_lon,
       price: fuelStation.price,
-    })).sort((fuelStation) => fuelStation.price);
+      price_indication: 0,
+      fade: '',
+    }))
 
   private _toFuelStation = (fuelStation: FuelStationDTO): FuelStation => ({
     ...fuelStation,
@@ -105,6 +111,23 @@ export class DashboardService {
   private readonly coordinatesToBody = (coordinates: Position[][]): CoordinatesBody => ({
     coordinates: coordinates[0].map((coord) => ({ latitude: coord[1], longitude: coord[0] }))
   })
+
+  private calculatePriceIndication(fuelStations: FuelStationSummary[]): FuelStationSummary[] {
+    const highestCosts = Math.max(...fuelStations.map((station) => station.price));
+    const lowestCosts = Math.min(...fuelStations.map((station) => station.price));
+    const calculate = (price: number) => Math.floor(((price - lowestCosts) / (highestCosts - lowestCosts)) * 100);
+
+    return fuelStations
+      .map((station: FuelStationSummary) => ({ ...station, price_indication: calculate(station.price) }))
+      .sort((a, b) => a.price_indication - b.price_indication)
+  }
+
+  private appendFaceColorOnNumber(fuelstation: FuelStationSummary) {
+    const value = fuelstation.price_indication / 100;
+    const hue = ((1 - value) * 120).toString(10);
+    const fade = ['hsl(', hue, ',100%,50%)'].join('');
+    return { ...fuelstation, fade }
+  }
 }
 
 type FuelStationSummaryDTO = {

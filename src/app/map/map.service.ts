@@ -80,7 +80,7 @@ export class MapService {
     layer.addTo(this._map);
   }
 
-  public removeLayerFromMap(layer: LayerGroup): void {
+  public removeLayerFromMap(layer: Layer): void {
     this._map.removeLayer(layer);
   }
 

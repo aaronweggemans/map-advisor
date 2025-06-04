@@ -1,6 +1,6 @@
 <ng-container *ngIf="{
   selectedMunicipality: selectedMunicipality$ | async,
-  results: results$ | async
+  results: fuelStations$ | async
 } as context">
   <p class="h5 mt-2 text-primary fw-bold">Vind de goedkoopste tankstation in uw gemeente.</p>
   <p>
@@ -11,11 +11,22 @@
     Daarna kunt u op basis van de geslecteerde gemeente de filters aanpassen. Hierdoor kunt u de goedkoopste tankstations vinden in uw gemeente.
   </p>
 
-  <app-selected-municipality *ngIf="context.selectedMunicipality" [selectedMunicipality]="context.selectedMunicipality"></app-selected-municipality>
+  <app-selected-municipality
+    *ngIf="context.selectedMunicipality"
+    [selectedMunicipality]="context.selectedMunicipality">
+  </app-selected-municipality>
 
-  <div class="my-4" *ngIf="context.selectedMunicipality">
-    <app-search-by-municipality (formSubmit)="formSubmitted($event)"></app-search-by-municipality>
+  <div class="my-4">
+    <app-search-by-municipality
+      (formSubmit)="formSubmitted($event)"
+      [enableForm]="!!context.selectedMunicipality"
+      (refreshPage)="refreshPage()">
+    </app-search-by-municipality>
   </div>
 
-  <app-search-results *ngIf="context.results" [results]="context.results"></app-search-results>
+  <app-search-results
+    (selectedFuelStation)="fuelStationIsSelected($event)"
+    *ngIf="context.results"
+    [results]="context.results">
+  </app-search-results>
 </ng-container>

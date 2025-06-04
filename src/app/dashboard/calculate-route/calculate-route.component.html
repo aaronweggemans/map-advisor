@@ -15,7 +15,7 @@
   <div class="my-4">
     <app-calculate-form (validFormSubmit)="onFormSubmit($event)" (twoLocationsSet)="setRouteAndCenterMiddle($event)"></app-calculate-form>
 
-    <ngx-loading class="mb-3" [config]="DEFAULT_LOADING_SETTINGS" [show]="context.isLoading"></ngx-loading>
+    <app-loading-spinner class="mb-3"></app-loading-spinner>
 
     <ul *ngIf="context.ORSProperties" class="list-group">
       <li class="list-group-item d-flex justify-content-between align-items-center">

@@ -17,7 +17,7 @@ export const routes: Routes = [
   {
     path: 'vind-tankstation-op-route',
     component: CalculateRouteComponent,
-    data: { title: 'Bereken de route' }
+    data: { title: 'Bereken uw route' }
   },
   {
     path: '**',
