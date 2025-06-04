@@ -41,7 +41,7 @@ import {PdokSuggestionService} from "../pdok-suggestion.service";
 })
 export class PdokSuggestionInputComponent implements ControlValueAccessor {
   @Input() title: string = '';
-  @Input() placeholder: string = 'Please enter a address';
+  @Input() placeholder: string = 'Voer hier uw address in';
 
   private readonly _showSuggestions$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   protected readonly showSuggestions$: Observable<boolean> = this._showSuggestions$.asObservable();

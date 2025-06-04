@@ -3,7 +3,8 @@ export type FuelStationSummary = {
   lat: number;
   lon: number;
   price: number;
-  price_indication?: number;
+  price_indication: number;
+  fade: string;
 }
 
 export type FuelStation = {
@@ -39,10 +40,24 @@ export type Prices = {
   source: string;
 }
 
-export type SoortFuelType =
-  | 'autogas'
-  | 'cng'
-  | 'diesel'
-  | 'diesel_special'
-  | 'euro98'
-  | 'euro95';
+export type Municipality = {
+  type: string
+  geometry: MunicipalityGeometry
+  properties: MunicipalityProperty
+  id: number
+}
+
+export type MunicipalityGeometry = {
+  type: string
+  coordinates: number[][] | number[][][]
+}
+
+export type MunicipalityProperty = {
+  name: string
+  code: string
+  numberOfInhabitants: number
+  area: number
+  covidInfections: number
+  province: string
+  region: string
+}

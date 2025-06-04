@@ -4,6 +4,9 @@ $-white-background-with-opacity-for-popup: rgba(255, 255, 255, 0.8) !important;
 $-dark-background-with-opacity: rgba(38, 38, 38, 0.6) !important;
 $-blur-effect: blur(6px) !important;
 
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
 .white-layout {
   background-color: $-white-background-with-opacity;
 }
@@ -21,9 +24,9 @@ $-blur-effect: blur(6px) !important;
   background-color: #262626 !important;
 }
 
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.leaflet-cursor-grab {
+  cursor: grab !important;
+}
 
 /** Popup manual desings */
 .leaflet-popup-content-wrapper {
