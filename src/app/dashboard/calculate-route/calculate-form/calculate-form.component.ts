@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {
   combineLatest,
   Observable,
@@ -11,7 +11,6 @@ import {AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators
 import {MapService} from "../../../map/map.service";
 import {ALL_SUPPORTED_FUEL_TYPES} from '../../../app.contants';
 import {PdokSuggestionInputComponent} from "../pdok-suggestion-input/pdok-suggestion-input.component";
-import {NgxLoadingModule} from "ngx-loading";
 import {AsyncPipe, NgForOf} from "@angular/common";
 import {PdokSuggestionService} from "../pdok-suggestion.service";
 import {LayerGroup, layerGroup} from "leaflet";
@@ -22,9 +21,8 @@ import {LayerGroup, layerGroup} from "leaflet";
   imports: [
     ReactiveFormsModule,
     PdokSuggestionInputComponent,
-    NgxLoadingModule,
     NgForOf,
-    AsyncPipe
+    AsyncPipe,
   ],
   templateUrl: './calculate-form.component.html',
 })

@@ -17,11 +17,14 @@ export class SearchByMunicipalityComponent {
   @Output() refreshPage: EventEmitter<void> = new EventEmitter();
 
   @Input() set enableForm(enableForm: boolean) {
-
     if(enableForm) {
       this._isButtonDisabled$.next(false);
       this.form.enable();
     }
+  }
+
+  @Input() set isLoading(isLoading: boolean) {
+    this._showRefreshButton.next(!isLoading);
   }
 
   private readonly _isButtonDisabled$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
@@ -44,7 +47,6 @@ export class SearchByMunicipalityComponent {
     if(this.form.valid) {
       this._isButtonDisabled$.next(true);
       this.formSubmit.emit(this.form.getRawValue());
-      this._showRefreshButton.next(true)
     }
   }
 

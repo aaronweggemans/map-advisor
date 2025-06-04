@@ -1,7 +1,6 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ViewContainerRef} from '@angular/core';
 import {MapService} from '../../map/map.service';
 import {CommonModule} from '@angular/common';
-import {NgxLoadingModule} from 'ngx-loading';
 import {DashboardService} from "../dashboard.service";
 import {FeatureGroup, LatLngTuple, layerGroup, LayerGroup, LeafletMouseEvent, polygon, PolylineOptions} from "leaflet";
 import {FuelStationSummary, Municipality, MunicipalityProperty} from "../dashboard.models";
@@ -11,12 +10,14 @@ import {SelectedMunicipalityComponent} from "./selected-municipality/selected-mu
 import {Observable, Subject, tap, withLatestFrom} from "rxjs";
 import {MunicipalityForm} from "./each-municipality.models";
 import {Coordinates} from "../calculate-route/calculate-route.models";
+import {PopupFuelStationComponent} from "../../shared/components/popup-fuel-station/popup-fuel-station.component";
+import {LoadingSpinnerComponent} from "../../shared/components/loading-spinner/loading-spinner.component";
 
 @Component({
   selector: 'app-each-municipality',
   standalone: true,
   templateUrl: './each-municipality.component.html',
-  imports: [CommonModule, NgxLoadingModule, SearchResultsComponent, SearchByMunicipalityComponent, SelectedMunicipalityComponent],
+  imports: [CommonModule, SearchResultsComponent, SearchByMunicipalityComponent, SelectedMunicipalityComponent, LoadingSpinnerComponent],
 })
 export class EachMunicipalityComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(SearchByMunicipalityComponent) searchByComponent!: SearchByMunicipalityComponent;
@@ -30,6 +31,9 @@ export class EachMunicipalityComponent implements OnInit, AfterViewInit, OnDestr
   private readonly _filteredFuelStations$: Subject<FuelStationSummary[]> = new Subject();
   protected readonly fuelStations$: Observable<FuelStationSummary[]> = this._filteredFuelStations$.asObservable();
 
+  private readonly _isLoading$: Subject<boolean> = new Subject();
+  protected readonly isLoading$: Observable<boolean> = this._isLoading$.asObservable();
+
   private readonly municipalitiesLayer = new FeatureGroup();
   private readonly selectedMunicipalityLayer = new FeatureGroup();
 
@@ -40,10 +44,12 @@ export class EachMunicipalityComponent implements OnInit, AfterViewInit, OnDestr
   constructor(
     private readonly dashboardService: DashboardService,
     private readonly mapService: MapService,
+    private readonly resolver: ViewContainerRef,
   ) {
   }
 
   ngOnInit() {
+    this._isLoading$.next(true);
     this.getAllMunicipalities();
   }
 
@@ -68,14 +74,16 @@ export class EachMunicipalityComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   protected refreshPage() {
-    this.mapService.removeLayerFromMap(this.municipalitiesLayer);
-    this.mapService.removeLayerFromMap(this.selectedMunicipalityLayer);
+    this.municipalitiesLayer.clearLayers();
+    this.selectedMunicipalityLayer.clearLayers();
+    this.mapService.centerBackToDefaultLocation();
     this.allPlacedFuelStations.clearLayers();
     this._filteredFuelStations$.next([]);
     this.getAllMunicipalities();
   }
 
   protected formSubmitted(formValues: MunicipalityForm) {
+    this._isLoading$.next(true);
     const bufferLayer = this.selectedMunicipalityLayer?.toGeoJSON();
 
     if (bufferLayer && bufferLayer.type === "FeatureCollection" && bufferLayer.features[0].geometry.type === "Polygon") {
@@ -87,15 +95,19 @@ export class EachMunicipalityComponent implements OnInit, AfterViewInit, OnDestr
 
           // Manually emits the amount when
           this.searchByComponent.amount.updateValueAndValidity();
+          this._isLoading$.next(false)
         }),
       ).subscribe();
     }
   }
 
   protected fuelStationIsSelected(fuelStation: FuelStationSummary) {
-    this.dashboardService.findFuelStationById(fuelStation.id).subscribe(() => {
-      // see calculate route, should be merged!
+    this.dashboardService.findFuelStationById(fuelStation.id).subscribe((detail) => {
+      const component = this.resolver.createComponent(PopupFuelStationComponent);
+      component.instance.fuelStation = detail;
+
       const coordinates: Coordinates = { lat: fuelStation.lat, lon: fuelStation.lon };
+      this.mapService.openPopup(coordinates, component.location.nativeElement);
       this.mapService.flyTo(coordinates);
     })
   }
@@ -112,6 +124,7 @@ export class EachMunicipalityComponent implements OnInit, AfterViewInit, OnDestr
       });
 
       this.mapService.addLayerToMap(this.municipalitiesLayer);
+      this._isLoading$.next(false)
     })
   }
 

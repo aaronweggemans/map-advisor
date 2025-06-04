@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {FuelStation} from "../../../dashboard.models";
+import {FuelStation} from "../../../dashboard/dashboard.models";
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 import {BehaviorSubject, Observable} from "rxjs";
 

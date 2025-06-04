@@ -1,4 +1,4 @@
-import {Component, forwardRef, Input} from '@angular/core';
+import {Component, forwardRef, HostBinding, Input} from '@angular/core';
 import {
   ControlValueAccessor, FormControl,
   FormsModule,
@@ -40,8 +40,11 @@ import {PdokSuggestionService} from "../pdok-suggestion.service";
   ]
 })
 export class PdokSuggestionInputComponent implements ControlValueAccessor {
+  @HostBinding('attr.id') hostId = null
+
   @Input() title: string = '';
   @Input() placeholder: string = 'Voer hier uw address in';
+  @Input({ required: true }) id: string = '';
 
   private readonly _showSuggestions$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   protected readonly showSuggestions$: Observable<boolean> = this._showSuggestions$.asObservable();

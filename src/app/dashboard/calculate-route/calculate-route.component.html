@@ -13,9 +13,9 @@
   </p>
 
   <div class="my-4">
-    <app-calculate-form (validFormSubmit)="onFormSubmit($event)" (twoLocationsSet)="setRouteAndCenterMiddle($event)"></app-calculate-form>
+    <app-loading-spinner class="mb-3" *ngIf="context.isLoading"></app-loading-spinner>
 
-    <app-loading-spinner class="mb-3"></app-loading-spinner>
+    <app-calculate-form (twoLocationsSet)="setRouteAndCenterMiddle($event)" (validFormSubmit)="onFormSubmit($event)"></app-calculate-form>
 
     <ul *ngIf="context.ORSProperties" class="list-group">
       <li class="list-group-item d-flex justify-content-between align-items-center">
