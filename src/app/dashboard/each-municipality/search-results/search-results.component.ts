@@ -6,11 +6,10 @@ import {FuelStationSummary} from "../../dashboard.models";
   selector: 'app-search-results',
   standalone: true,
   imports: [
+    NgIf,
     NgForOf,
-    NgIf
   ],
   templateUrl: './search-results.component.html',
-  styleUrl: './search-results.component.scss'
 })
 export class SearchResultsComponent {
   @Input({ required: true }) results!: FuelStationSummary[];

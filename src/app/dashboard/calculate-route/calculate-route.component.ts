@@ -1,11 +1,9 @@
 import {AfterViewInit, Component, OnDestroy, ViewChild, ViewContainerRef} from '@angular/core';
 import {AsyncPipe, NgIf} from "@angular/common";
-import {NgxLoadingModule} from "ngx-loading";
 import {CalculateFormComponent} from "./calculate-form/calculate-form.component";
 import {Coordinates, ORSProperties, ORSRoutePlan, RouteForm} from "./calculate-route.models";
 import {SearchResultsComponent} from "./search-results/search-results.component";
 import {MapService} from "../../map/map.service";
-import {PopupFuelStationComponent} from "./search-results/popup-fuel-station/popup-fuel-station.component";
 import {DashboardService} from "../dashboard.service";
 import {FuelStation, FuelStationSummary} from "../dashboard.models";
 import {
@@ -22,7 +20,6 @@ import {
 } from "rxjs";
 import {NotifierService} from "angular-notifier";
 import {ORSRouteService} from "./ors-route.service";
-import {DEFAULT_LOADING_SETTINGS} from "../../app.contants";
 import {
   geoJSON,
   GeoJSON,
@@ -37,13 +34,13 @@ import {
 import {buffer, lineString} from "@turf/turf";
 import {Feature, LineString} from 'geojson';
 import {LoadingSpinnerComponent} from "../../shared/components/loading-spinner/loading-spinner.component";
+import {PopupFuelStationComponent} from "../../shared/components/popup-fuel-station/popup-fuel-station.component";
 
 @Component({
   selector: 'app-calculate-route',
   standalone: true,
   imports: [
     NgIf,
-    NgxLoadingModule,
     CalculateFormComponent,
     SearchResultsComponent,
     AsyncPipe,
@@ -57,8 +54,6 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
   private bufferLayer: GeoJSON | null = null;
   private turfLine: Feature<LineString> | null = null;
   private turfLineLayer: Polyline | null = null;
-
-  protected readonly DEFAULT_LOADING_SETTINGS = DEFAULT_LOADING_SETTINGS;
 
   private readonly onDestroy$ = new Subject<void>();
 

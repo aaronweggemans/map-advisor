@@ -1,9 +1,9 @@
 <form (ngSubmit)="onFormSubmit()" [formGroup]="form">
   <div class="form-group mb-3">
-    <app-pdok-suggestion-input formControlName='start' title="Voer een startpunt in."></app-pdok-suggestion-input>
+    <app-pdok-suggestion-input formControlName='start' id='startPunt' title="Voer een startpunt in."></app-pdok-suggestion-input>
   </div>
   <div class="form-group mb-3">
-    <app-pdok-suggestion-input formControlName='end' title="Voer een eindpunt in."></app-pdok-suggestion-input>
+    <app-pdok-suggestion-input formControlName='end' id='eindPunt' title="Voer een eindpunt in."></app-pdok-suggestion-input>
   </div>
   <div class="form-group mb-3">
     <label class="form-label" for="Radius">Radius per meter {{ radius.value === 0 ? '' : '(' + radius.value + ' meters)' }}</label>
@@ -20,7 +20,7 @@
     </select>
   </div>
   <div class="form-group mb-3">
-    <button [attr.disabled]="(radius.value === 0 || form.invalid || (submitted$ | async) || false) || undefined"
+    <button [attr.disabled]="(radius.value === 0 || form.invalid || (submitted$ | async)) || undefined"
             class="btn btn-primary">Haal tankstations op</button>
   </div>
 </form>
