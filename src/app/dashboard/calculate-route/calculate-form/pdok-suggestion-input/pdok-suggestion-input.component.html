@@ -7,15 +7,14 @@
     [formControl]="suggestionInput"
     [id]="id"
     [placeholder]="placeholder"
-    aria-describedby="startPlace"
     autocomplete="off"
     class="form-control"
     type="text"
   />
-  <ul class="list-group z-2" *ngIf="isLoading$ | async">
+  <ul class="list-group" *ngIf="isLoading$ | async">
     <app-loading-spinner class="list-group-item" width="2.5em" height="2.5em"></app-loading-spinner>
   </ul>
-  <ul *ngIf="context.suggestions && context.showSuggestions" class="list-group z-2">
+  <ul *ngIf="context.suggestions && context.showSuggestions" class="list-group">
     <button
       (click)="selectSuggestion(suggestion)"
       *ngFor="let suggestion of context.suggestions"

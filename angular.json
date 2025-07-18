@@ -6,6 +6,9 @@
     "map-advisor": {
       "projectType": "application",
       "schematics": {
+        "@ngneat/spectator:spectator-component": {
+          "unitTestRunner": "jest"
+        },
         "@schematics/angular:component": {
           "style": "scss"
         }

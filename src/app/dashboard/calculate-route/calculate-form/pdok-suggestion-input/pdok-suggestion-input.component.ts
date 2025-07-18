@@ -11,7 +11,7 @@ import {
   catchError,
   debounceTime,
   distinctUntilChanged,
-  EMPTY, filter,
+  EMPTY,
   map,
   Observable, of, Subject,
   switchMap,
@@ -45,8 +45,8 @@ import {NotifierService} from "angular-notifier";
 export class PdokSuggestionInputComponent implements ControlValueAccessor {
   @HostBinding('attr.id') hostId = null
 
-  @Input() title: string = '';
   @Input() placeholder: string = 'Voer hier uw address in';
+  @Input({ required: true }) title: string = '';
   @Input({ required: true }) id: string = '';
 
   private readonly _showSuggestions$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -60,6 +60,7 @@ export class PdokSuggestionInputComponent implements ControlValueAccessor {
   protected readonly suggestions$ = this.suggestionInput.valueChanges.pipe(
     tap(() => this._showSuggestions$.next(false)),
     debounceTime(500),
+    tap(() => console.log('Waiting for suggestions...')),
     map(value => value.trim()),
     distinctUntilChanged(),
     switchMap(value => value ? this.fetchSuggestions(value) : of([]))
@@ -67,11 +68,24 @@ export class PdokSuggestionInputComponent implements ControlValueAccessor {
 
   private onChange!: (value: string) => void;
 
-  constructor(private readonly pdokSuggestionService: PdokSuggestionService, private readonly notifierService: NotifierService) {
-    this.suggestionInput.valueChanges.pipe(
-      filter(value => value.length > 0),
-      tap(() => this._showSuggestions$.next(true))
-    ).subscribe();
+  constructor(private readonly pdokSuggestionService: PdokSuggestionService, private readonly notifierService: NotifierService) {}
+
+  registerOnChange(onChange: (value: string) => void): void {
+    this.onChange = onChange;
+  }
+
+  registerOnTouched(): void {}
+
+  setDisabledState(isDisabled: boolean): void {
+    if (isDisabled) {
+      this.suggestionInput.disable();
+    } else {
+      this.suggestionInput.enable();
+    }
+  }
+
+  writeValue(value: string): void {
+    this.suggestionInput.setValue(value);
   }
 
   protected selectSuggestion(suggestion: PDOKAddressMatch): void {
@@ -94,23 +108,5 @@ export class PdokSuggestionInputComponent implements ControlValueAccessor {
         this._showSuggestions$.next(true);
       })
     );
-  }
-
-  registerOnChange(onChange: (value: string) => void): void {
-    this.onChange = onChange;
-  }
-
-  registerOnTouched(): void {}
-
-  setDisabledState(isDisabled: boolean): void {
-    if (isDisabled) {
-      this.suggestionInput.disable();
-    } else {
-      this.suggestionInput.enable();
-    }
-  }
-
-  writeValue(value: string): void {
-    this.suggestionInput.setValue(value);
   }
 }
