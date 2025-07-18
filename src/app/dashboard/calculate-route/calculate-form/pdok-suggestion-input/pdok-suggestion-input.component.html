@@ -12,7 +12,10 @@
     class="form-control"
     type="text"
   />
-  <ul *ngIf="context.suggestions && context.showSuggestions" class="list-group position-fixed z-2">
+  <ul class="list-group z-2" *ngIf="isLoading$ | async">
+    <app-loading-spinner class="list-group-item" width="2.5em" height="2.5em"></app-loading-spinner>
+  </ul>
+  <ul *ngIf="context.suggestions && context.showSuggestions" class="list-group z-2">
     <button
       (click)="selectSuggestion(suggestion)"
       *ngFor="let suggestion of context.suggestions"

@@ -10,7 +10,7 @@ import {environment} from "../../../environments/environment";
 export class PdokSuggestionService {
   constructor(private readonly httpClient: HttpClient) { }
 
-  public getSuggestionsOnAddress(address: string): Observable<PDOKAddressSuggestion> {
+  public getSuggestionsOnAddress(address: string): Observable<PDOKAddressMatch[]> {
     const params = new HttpParams()
       .set('q', address)
       .set('start', '0')
@@ -20,7 +20,7 @@ export class PdokSuggestionService {
 
     return this.httpClient
       .get<PDOKSuggestionResponseDto>(`${environment.locationUrl}/suggest`, { params })
-      .pipe(map(this.toAddressSuggestion));
+      .pipe(map(this.toAddressSuggestion), map((suggestions) => suggestions.suggestions));
   }
 
   public getLocation(id: string): Observable<Coordinates> {
