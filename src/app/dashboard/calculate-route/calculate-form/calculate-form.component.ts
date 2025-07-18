@@ -1,6 +1,7 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {
-  combineLatest,
+  catchError,
+  combineLatest, EMPTY,
   Observable,
   Subject,
   switchMap,
@@ -10,10 +11,11 @@ import {Coordinates, RouteForm} from "../calculate-route.models";
 import {AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MapService} from "../../../map/map.service";
 import {ALL_SUPPORTED_FUEL_TYPES} from '../../../app.contants';
-import {PdokSuggestionInputComponent} from "../pdok-suggestion-input/pdok-suggestion-input.component";
+import {PdokSuggestionInputComponent} from "./pdok-suggestion-input/pdok-suggestion-input.component";
 import {AsyncPipe, NgForOf} from "@angular/common";
 import {PdokSuggestionService} from "../pdok-suggestion.service";
 import {LayerGroup, layerGroup} from "leaflet";
+import {NotifierService} from "angular-notifier";
 
 @Component({
   selector: 'app-calculate-form',
@@ -29,6 +31,7 @@ import {LayerGroup, layerGroup} from "leaflet";
 export class CalculateFormComponent implements OnInit, OnDestroy {
   @Output() validFormSubmit: EventEmitter<RouteForm> = new EventEmitter();
   @Output() twoLocationsSet: EventEmitter<[Coordinates, Coordinates]> = new EventEmitter();
+  @Output() isRequesting: EventEmitter<boolean> = new EventEmitter();
 
   private readonly PDOK_MARKER_LAYER_A = layerGroup();
   private readonly PDOK_MARKER_LAYER_B = layerGroup();
@@ -51,22 +54,21 @@ export class CalculateFormComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly pdokSuggestionService: PdokSuggestionService,
+    private readonly notifierService: NotifierService,
     private readonly mapService: MapService,
   ) {}
 
   ngOnInit() {
     this.requestPDOKCoordinatesAndConfigureMap(this.start.valueChanges, this.PDOK_MARKER_LAYER_A)
-      .subscribe((coords) => (this.locationA$.next(coords), this.mapService.flyTo(coords)));
+      .subscribe((coords) => { this.locationA$.next(coords); this.mapService.flyTo(coords) });
 
     this.requestPDOKCoordinatesAndConfigureMap(this.end.valueChanges, this.PDOK_MARKER_LAYER_B)
-      .subscribe((coords) => this.locationB$.next(coords));
+      .subscribe((coords) => {
+        this.locationB$.next(coords)
+      });
 
-    combineLatest([this.locationA$, this.locationB$]).subscribe((data) => {
-      this.twoLocationsSet.emit(data);
-      this.radius.enable({ emitEvent: false });
-      this.amount.enable();
-      this.fuelType.enable();
-    });
+    combineLatest([this.locationA$, this.locationB$]).subscribe((data) => this.twoLocationsSet.emit(data));
+    this.fuelType.valueChanges.subscribe(() => this._submitted$.next(false));
   }
 
   ngOnDestroy() {
@@ -104,12 +106,21 @@ export class CalculateFormComponent implements OnInit, OnDestroy {
 
   private requestPDOKCoordinatesAndConfigureMap(of$: Observable<string>, layer: LayerGroup): Observable<Coordinates> {
     return of$.pipe(
-      switchMap((id: string) => this.pdokSuggestionService.getLocation(id)),
+      tap(() => this.isRequesting.emit(true)),
+      switchMap((id: string) => this.pdokSuggestionService.getLocation(id).pipe(
+        catchError(() => {
+          this.isRequesting.emit(false);
+          this.start.patchValue('', { emitEvent: false });
+          this.notifierService.show({ type: 'error',  message: `Er ging iets mis bij het ophalen van een specifieke locatie` });
+          return EMPTY;
+        }))
+      ),
       tap((coordinates) => {
         this._submitted$.next(false)
         this.mapService.appendMarker(coordinates.lat, coordinates.lon, layer);
         this.radius.patchValue(0, { emitEvent: false })
       }),
+      tap(() => this.isRequesting.emit(false)),
     )
   }
 }

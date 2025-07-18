@@ -13,12 +13,14 @@ import {
   distinctUntilChanged,
   EMPTY, filter,
   map,
-  Observable,
+  Observable, of, Subject,
   switchMap,
   tap
 } from "rxjs";
-import {PDOKAddressMatch} from "../calculate-route.models";
-import {PdokSuggestionService} from "../pdok-suggestion.service";
+import {PDOKAddressMatch} from "../../calculate-route.models";
+import {PdokSuggestionService} from "../../pdok-suggestion.service";
+import {LoadingSpinnerComponent} from "../../../../shared/components/loading-spinner/loading-spinner.component";
+import {NotifierService} from "angular-notifier";
 
 @Component({
   selector: 'app-pdok-suggestion-input',
@@ -28,7 +30,8 @@ import {PdokSuggestionService} from "../pdok-suggestion.service";
     NgForOf,
     NgIf,
     ReactiveFormsModule,
-    AsyncPipe
+    AsyncPipe,
+    LoadingSpinnerComponent
   ],
   templateUrl: './pdok-suggestion-input.component.html',
   providers: [
@@ -49,39 +52,47 @@ export class PdokSuggestionInputComponent implements ControlValueAccessor {
   private readonly _showSuggestions$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   protected readonly showSuggestions$: Observable<boolean> = this._showSuggestions$.asObservable();
 
+  private readonly _isLoading$: Subject<boolean> = new Subject<boolean>();
+  protected readonly isLoading$: Observable<boolean> = this._isLoading$.asObservable();
+
   protected readonly suggestionInput: FormControl<string> = new FormControl('', { nonNullable: true });
 
-  protected readonly suggestions$: Observable<PDOKAddressMatch[]> =
-    this.suggestionInput.valueChanges.pipe((of) => this.mapAndFilterOnPostalCode(of));
+  protected readonly suggestions$ = this.suggestionInput.valueChanges.pipe(
+    tap(() => this._showSuggestions$.next(false)),
+    debounceTime(500),
+    map(value => value.trim()),
+    distinctUntilChanged(),
+    switchMap(value => value ? this.fetchSuggestions(value) : of([]))
+  );
 
   private onChange!: (value: string) => void;
 
-  constructor(private readonly pdokSuggestionService: PdokSuggestionService) {
+  constructor(private readonly pdokSuggestionService: PdokSuggestionService, private readonly notifierService: NotifierService) {
+    this.suggestionInput.valueChanges.pipe(
+      filter(value => value.length > 0),
+      tap(() => this._showSuggestions$.next(true))
+    ).subscribe();
   }
 
   protected selectSuggestion(suggestion: PDOKAddressMatch): void {
     this._showSuggestions$.next(false);
-    this.suggestionInput.setValue(suggestion.weergavenaam, { emitEvent: false });
+    this.suggestionInput.setValue(suggestion.weergavenaam, {emitEvent: false});
     this.onChange(suggestion.id);
   }
 
-  private mapAndFilterOnPostalCode(of$: Observable<string>): Observable<PDOKAddressMatch[]> {
-    return of$.pipe(
-      debounceTime(1000),
-      map(value => value.trim()),
-      filter((value) => value.length > 0),
-      distinctUntilChanged(),
-      switchMap((address) =>
-        this.pdokSuggestionService.getSuggestionsOnAddress(address).pipe(
-          catchError(() => {
-            this.suggestionInput.disable();
-            this._showSuggestions$.next(false);
-            return EMPTY;
-          })
-        )
-      ),
-      tap(() => this._showSuggestions$.next(true)),
-      map((suggestions) => suggestions.suggestions)
+  private fetchSuggestions(address: string): Observable<PDOKAddressMatch[]> {
+    this._isLoading$.next(true);
+    return this.pdokSuggestionService.getSuggestionsOnAddress(address).pipe(
+      catchError(() => {
+        this.notifierService.show({ type: 'error', message: 'Er ging iets mis met het ophalen van de suggesties' });
+        this._isLoading$.next(false);
+        this._showSuggestions$.next(false);
+        return EMPTY;
+      }),
+      tap(() => {
+        this._isLoading$.next(false);
+        this._showSuggestions$.next(true);
+      })
     );
   }
 
@@ -99,5 +110,7 @@ export class PdokSuggestionInputComponent implements ControlValueAccessor {
     }
   }
 
-  writeValue(): void {}
+  writeValue(value: string): void {
+    this.suggestionInput.setValue(value);
+  }
 }

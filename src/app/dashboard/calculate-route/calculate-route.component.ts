@@ -61,10 +61,17 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
 
   private readonly _drawPolyline$ = new Subject<[Coordinates, Coordinates]>();
   protected readonly ORSProperties$: Observable<ORSProperties> = this._drawPolyline$.asObservable().pipe(
-    switchMap((coordinates) => this.orsRouteService.getRoute(coordinates[0], coordinates[1]).pipe(
+    tap(() => this.setIsLoading(true)),
+    switchMap((coordinates: [Coordinates, Coordinates]) => this.orsRouteService.getRoute(coordinates[0], coordinates[1]).pipe(
       catchError(this.handleError.bind(this)),
-      tap((data) => this.drawPolyLine(data.geometry.coordinates)),
-      map((data: ORSRoutePlan) => data.properties))
+      tap((data) => {
+        this.formComponent.radius.enable({ emitEvent: false });
+        this.formComponent.amount.enable();
+        this.formComponent.fuelType.enable();
+        this.setIsLoading(false)
+        this.drawPolyLine(data.geometry.coordinates)
+      }),
+      map((data: ORSRoutePlan) => data.properties)),
     ));
 
   private readonly _allFuelStations$: Subject<FuelStationSummary[]> = new Subject();
@@ -118,6 +125,10 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
     if(this.turfLineLayer) this.mapService.removeLayerFromMap(this.turfLineLayer);
   }
 
+  protected setIsLoading(isLoading: boolean): void {
+    this._isLoading$.next(isLoading);
+  }
+
   protected fuelStationIsSelected(fuelStation: FuelStationSummary) {
     this.dashboardService.findFuelStationById(fuelStation.id).subscribe((detail: FuelStation) => {
       const component = this.resolver.createComponent(PopupFuelStationComponent);
@@ -149,16 +160,14 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
   }
 
   protected setRouteAndCenterMiddle(coordinates: [Coordinates, Coordinates]): void {
+    this._allFuelStations$.next([]);
+    this.allPlacedFuelStations.clearLayers();
+    if(this.turfLineLayer) this.mapService.removeLayerFromMap(this.turfLineLayer)
+    if(this.bufferLayer) this.mapService.removeLayerFromMap(this.bufferLayer)
     this._drawPolyline$.next(coordinates);
     const locationA: LatLngLiteral = { lat: coordinates[0].lat, lng: coordinates[0].lon };
     const locationB: LatLngLiteral = { lat: coordinates[1].lat, lng: coordinates[1].lon };
     this.mapService.flyWithZoom(latLngBounds(locationA, locationB));
-  }
-
-  private handleError() {
-    this.notifierService.show({ type: 'error',  message: `Something went wrong!`});
-    this._isLoading$.next(false);
-    return EMPTY;
   }
 
   private drawPolyLine(route: number[][]) {
@@ -172,5 +181,11 @@ export class CalculateRouteComponent implements AfterViewInit, OnDestroy {
     const bufferRadius = buffer(this.turfLine!, radius / 1000, {units: 'kilometers'});
     this.bufferLayer = geoJSON(bufferRadius, {style: {color: '#BDC9CD', weight: 5, fillOpacity: 0.3}})
     this.mapService.addLayerToMap(this.bufferLayer)
+  }
+
+  private handleError() {
+    this.notifierService.show({ type: 'error',  message: `Er ging iets mis met de aanvraag!`});
+    this._isLoading$.next(false);
+    return EMPTY;
   }
 }
